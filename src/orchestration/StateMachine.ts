@@ -47,8 +47,11 @@ export class StateMachine {
       case CaseState.Execute: return CaseState.Evaluate;
       case CaseState.Evaluate: 
         return current.hypotheses.some(h => h.status === 'Validated') 
-          ? CaseState.Resolve 
-          : CaseState.Plan; // Loop back if nothing validated
+          ? CaseState.Resolve
+          : CaseState.Plan; // Loop back to revise plan
+      case CaseState.Resolve: return CaseState.ReadyForSolution;
+      case CaseState.ReadyForSolution: return CaseState.Postmortem;
+      case CaseState.Postmortem: return CaseState.Postmortem; // Terminal state
       default: return current.state;
     }
   }

@@ -1,0 +1,153 @@
+{
+  "id": "generic",
+  "version": "1.0.0",
+  "name": "Generic Troubleshooting",
+  "description": "General-purpose troubleshooting workflow for any issue type",
+  "keywords": [],
+  "errorPatterns": [],
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "What specific error or problem are you experiencing?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "Describe the exact error message, unexpected behavior, or issue you're encountering. Include error codes if available.",
+      "examples": [
+        "Application returns 500 Internal Server Error when accessing /api/users endpoint",
+        "Database connection timeout after 30 seconds",
+        "Build fails with 'MODULE_NOT_FOUND' error"
+      ],
+      "verificationRequired": true
+    },
+    {
+      "id": "q2",
+      "ask": "When did this problem first occur?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "Provide the date and time when the issue started. Note if it's intermittent or consistent.",
+      "examples": [
+        "Started January 5th around 3:00 PM UTC, happens every time now",
+        "Began after deployment on January 6th at 10:30 AM",
+        "Intermittent failures starting last week, occurs about 30% of the time"
+      ]
+    },
+    {
+      "id": "q3",
+      "ask": "What changes were made before the problem started?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "List any recent deployments, configuration changes, dependency updates, or infrastructure modifications. If nothing changed, state that explicitly.",
+      "examples": [
+        "Updated Node.js from v16 to v18 and deployed new code version",
+        "Changed database connection string in configuration",
+        "No changes made - issue appeared spontaneously"
+      ]
+    },
+    {
+      "id": "q4",
+      "ask": "What have you tried to resolve this issue?",
+      "required": false,
+      "expectedFormat": "text",
+      "guidance": "Describe troubleshooting steps already attempted, including restarts, rollbacks, or configuration changes.",
+      "examples": [
+        "Restarted the application service twice, checked logs, verified credentials",
+        "Rolled back to previous version but issue persists",
+        "Nothing yet - just discovered the issue"
+      ]
+    },
+    {
+      "id": "q5",
+      "ask": "What is the expected behavior versus actual behavior?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "Clearly describe what should happen versus what is actually happening.",
+      "examples": [
+        "Expected: API returns user data in JSON format. Actual: Returns empty response with 200 status",
+        "Expected: Page loads in under 2 seconds. Actual: Takes 30+ seconds or times out",
+        "Expected: Data saved to database. Actual: Save operation fails silently"
+      ]
+    },
+    {
+      "id": "q6",
+      "ask": "What environment is affected (production, staging, development)?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "Specify which environment(s) are experiencing the issue. Note if the issue occurs in all environments or just specific ones.",
+      "examples": [
+        "Production only - staging and dev work fine",
+        "All environments affected",
+        "Development environment - haven't deployed to staging yet"
+      ]
+    },
+    {
+      "id": "q7",
+      "ask": "Are there any relevant log messages or error details?",
+      "required": false,
+      "expectedFormat": "text",
+      "guidance": "Include relevant log excerpts, stack traces, or error details. Focus on entries around the time the problem occurred.",
+      "examples": [
+        "Error: ECONNREFUSED at TCPConnectWrap.afterConnect",
+        "SQL Exception: Invalid object name 'Users'",
+        "No error logs found - application runs but produces incorrect results"
+      ]
+    }
+  ],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "hypothesis": "Configuration values (connection strings, API keys, environment variables) are incorrect or missing",
+      "reasoning": "Configuration issues are the most common cause of failures after deployments or environment changes",
+      "investigationSteps": [
+        "Verify all required configuration values are present",
+        "Check if configuration differs between working and non-working environments",
+        "Validate credentials and connection strings are correct and not expired"
+      ]
+    },
+    {
+      "id": "h2",
+      "hypothesis": "A recent change (code, configuration, or infrastructure) introduced the issue",
+      "reasoning": "Most issues correlate with recent changes to the system",
+      "investigationSteps": [
+        "Review recent deployments, commits, or configuration changes",
+        "Compare current state with last known working version",
+        "Attempt rollback to previous version to verify if issue resolves"
+      ]
+    },
+    {
+      "id": "h3",
+      "hypothesis": "Resource constraints (memory, CPU, disk, connections) are being exceeded",
+      "reasoning": "Resource exhaustion can cause failures, timeouts, and performance degradation",
+      "investigationSteps": [
+        "Check resource utilization metrics (CPU, memory, disk space, network)",
+        "Review connection pool sizes and limits",
+        "Analyze if issue correlates with high load or usage patterns"
+      ]
+    },
+    {
+      "id": "h4",
+      "hypothesis": "External dependencies (APIs, databases, services) are unavailable or failing",
+      "reasoning": "Systems often rely on external services that may be down or degraded",
+      "investigationSteps": [
+        "Test connectivity to all external dependencies",
+        "Check status pages or monitoring for dependent services",
+        "Verify network connectivity and firewall rules"
+      ]
+    },
+    {
+      "id": "h5",
+      "hypothesis": "Permission or authentication issues are preventing required operations",
+      "reasoning": "Access control problems frequently cause authorization and operation failures",
+      "investigationSteps": [
+        "Verify service accounts and credentials have necessary permissions",
+        "Check for expired certificates or tokens",
+        "Review audit logs for permission denied errors"
+      ]
+    }
+  ],
+  "classification": "General",
+  "metadata": {
+    "createdAt": "2026-01-07T00:00:00.000Z",
+    "updatedAt": "2026-01-07T00:00:00.000Z",
+    "usageCount": 0
+  }
+}

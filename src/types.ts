@@ -1,13 +1,14 @@
 export enum CaseState {
-  Intake = "Intake",
-  Normalize = "Normalize",
-  Classify = "Classify",
-  Plan = "Plan",
-  Execute = "Execute",
-  PendingExternal = "PendingExternal",
-  Evaluate = "Evaluate",
-  Resolve = "Resolve",
-  Postmortem = "Postmortem"
+  Intake = "Intake",           // Initial problem intake and evidence collection
+  Normalize = "Normalize",     // Standardize and structure data
+  Classify = "Classify",       // Categorize issue type
+  Plan = "Plan",               // Generate remediation plan
+  Execute = "Execute",         // Apply fixes
+  PendingExternal = "PendingExternal",  // Waiting for external input
+  Evaluate = "Evaluate",       // Verify if fix worked
+  Resolve = "Resolve",         // Mark as resolved with postmortem
+  ReadyForSolution = "ReadyForSolution", // Compile solution for knowledge base
+  Postmortem = "Postmortem"    // Final analysis (deprecated - use ReadyForSolution)
 }
 
 export interface CaseEvent {

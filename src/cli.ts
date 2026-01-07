@@ -397,29 +397,43 @@ yargs(hideBin(process.argv))
                   problemScope.errorPatterns.join(' ')
               );
               
+              let templateToApply: any = null;
+              
               if (matchedTemplates.length > 0) {
-                  const topMatch = matchedTemplates[0];
-                  console.log(chalk.green(`   ✓ Found matching template: "${topMatch.name}"`));
-                  console.log(chalk.gray(`     Classification: ${topMatch.classification || 'General'}`));
-                  
-                  // Apply template questions if case doesn't have them yet
-                  if (c.questions.length === 0) {
-                      c.questions = topMatch.questions.map((q: any) => ({
-                          ...q,
-                          status: 'Open' as const
-                      }));
-                      c.templateId = topMatch.id;
-                      c.classification = topMatch.classification;
-                      await store.save(c);
-                      await store.appendEvent(argv.id, 'TemplateApplied', `Applied template: ${topMatch.name}`);
-                      console.log(chalk.green(`   ✓ Applied ${topMatch.questions.length} diagnostic questions from template`));
+                  templateToApply = matchedTemplates[0];
+                  console.log(chalk.green(`   ✓ Found matching template: "${templateToApply.name}"`));
+                  console.log(chalk.gray(`     Classification: ${templateToApply.classification || 'General'}`));
+              } else {
+                  // Load generic template as fallback
+                  console.log(chalk.yellow('   ⚠️  No specialized template found'));
+                  try {
+                      templateToApply = await templateManager.load('generic');
+                      console.log(chalk.cyan(`   ℹ Using generic troubleshooting workflow`));
+                  } catch (err: any) {
+                      console.log(chalk.red(`   ✗ Generic template not found - case will have no diagnostic questions`));
+                      console.log(chalk.gray(`     Run: Create templates/generic.json with basic troubleshooting questions`));
                   }
-                  
+              }
+              
+              // Apply template questions if case doesn't have them yet and we found a template
+              if (templateToApply && c.questions.length === 0) {
+                  c.questions = templateToApply.questions.map((q: any) => ({
+                      ...q,
+                      status: 'Open' as const
+                  }));
+                  c.templateId = templateToApply.id;
+                  c.classification = templateToApply.classification;
+                  await store.save(c);
+                  await store.appendEvent(argv.id, 'TemplateApplied', `Applied template: ${templateToApply.name}`);
+                  console.log(chalk.green(`   ✓ Applied ${templateToApply.questions.length} diagnostic questions from template`));
+              }
+              
+              if (templateToApply) {
                   // Show evidence collection plan
                   console.log(chalk.bold.cyan('\n📋 EVIDENCE COLLECTION PLAN'));
                   console.log(chalk.white('\n   Based on this issue type, you should collect:'));
                   
-                  const evidenceNeeds = topMatch.questions
+                  const evidenceNeeds = templateToApply.questions
                       .filter((q: any) => q.verificationRequired || q.guidance)
                       .slice(0, 3);
                   
@@ -441,9 +455,6 @@ yargs(hideBin(process.argv))
                   console.log(chalk.gray(`   piper add-evidence ${argv.id} <file-path>`));
                   console.log(chalk.gray('   or'));
                   console.log(chalk.gray(`   piper add-evidence ${argv.id} <folder-path>`));
-                  
-              } else {
-                  console.log(chalk.yellow('   ⚠️  No specialized template found - using generic workflow'));
               }
               
               console.log(chalk.bold.cyan('\n🔄 NEXT STEPS:'));
