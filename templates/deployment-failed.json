@@ -1,0 +1,100 @@
+{
+  "id": "deployment-failed",
+  "version": "1.0.0",
+  "name": "Azure Deployment Failed",
+  "description": "Template for Azure deployment failures with error code DeploymentFailed",
+  "keywords": [
+    "deployment",
+    "deploymentfailed",
+    "azure",
+    "arm",
+    "bicep",
+    "resource",
+    "provision"
+  ],
+  "errorPatterns": [
+    "DeploymentFailed",
+    "deployment.*failed",
+    "error code:? deploymentfailed"
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "What is the exact deployment error code and message?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "1. Navigate to Azure Portal → Deployments\n2. Find the failed deployment\n3. Click 'Error details' to see full error\n4. Copy entire error message including code",
+      "examples": [
+        "DeploymentFailed: The resource operation completed with terminal provisioning state 'Failed'",
+        "Code: InvalidTemplateDeployment, Message: The template deployment failed..."
+      ],
+      "verificationRequired": true
+    },
+    {
+      "id": "q2",
+      "ask": "Which Azure resource type was being deployed?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "1. Check deployment template or pipeline YAML\n2. Look for 'type' property in ARM/Bicep\n3. Common format: Microsoft.Network/virtualNetworks",
+      "examples": [
+        "Microsoft.Compute/virtualMachines",
+        "Microsoft.Storage/storageAccounts",
+        "Microsoft.Web/sites"
+      ]
+    },
+    {
+      "id": "q3",
+      "ask": "What deployment method was used (Portal, CLI, ARM, Bicep, Terraform)?",
+      "required": true,
+      "expectedFormat": "text"
+    },
+    {
+      "id": "q4",
+      "ask": "What is the subscription ID and resource group name?",
+      "required": true,
+      "expectedFormat": "text",
+      "guidance": "1. Azure Portal → Subscription\n2. Copy Subscription ID (GUID format)\n3. Note Resource Group name from deployment",
+      "verificationRequired": true
+    },
+    {
+      "id": "q5",
+      "ask": "Has this deployment succeeded before in this environment?",
+      "required": false,
+      "expectedFormat": "text"
+    },
+    {
+      "id": "q6",
+      "ask": "What changed since the last successful deployment?",
+      "required": false,
+      "expectedFormat": "text"
+    }
+  ],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Missing required permissions or RBAC role assignments"
+    },
+    {
+      "id": "h2",
+      "description": "Resource quota exceeded in subscription or region"
+    },
+    {
+      "id": "h3",
+      "description": "Invalid template syntax or parameter values"
+    },
+    {
+      "id": "h4",
+      "description": "Resource provider not registered"
+    },
+    {
+      "id": "h5",
+      "description": "Network or firewall blocking deployment operation"
+    }
+  ],
+  "classification": "Configuration",
+  "metadata": {
+    "createdAt": "2026-01-06T00:00:00.000Z",
+    "updatedAt": "2026-01-07T01:11:23.040Z",
+    "usageCount": 13
+  }
+}

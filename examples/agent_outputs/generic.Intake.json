@@ -1,0 +1,13 @@
+{
+  "thoughtProcess": "The case has just started. I need to gather basics.",
+  "newQuestions": [
+    { 
+      "id": "q1", 
+      "ask": "Please provide the pipeline error logs.", 
+      "required": true, 
+      "status": "Open", 
+      "expectedFormat": "path" 
+    }
+  ],
+  "recommendedState": "Intake"
+}

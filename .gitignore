@@ -1,0 +1,56 @@
+# Case files - all active cases (CONTAINS CUSTOMER DATA - NEVER COMMIT)
+cases/
+
+# Case backups - timestamped backups created by 'piper clear --backup' (CUSTOMER DATA)
+cases_backup_*/
+
+# Any test or demo evidence files (MAY CONTAIN PII)
+test-*.txt
+demo-*.txt
+**/artifacts/
+*.zip
+
+# Temporary working files
+.piper-scope-*.txt
+.piper-prompt-*.txt
+
+# Documentation files that may contain customer examples
+demo-interactive-help.md
+
+# Secrets and credentials (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+secrets.txt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/

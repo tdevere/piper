@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "scope": { "type": "array", "items": { "type": "string" } },
+    "requiredEvidenceTags": { "type": "array", "items": { "type": "string" } },
+    "initialQuestions": { "type": "array", "items": { "$ref": "case.schema.json#/properties/questions/items" } },
+    "commonFailureDomains": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["name", "scope", "requiredEvidenceTags"]
+}

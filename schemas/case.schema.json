@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "principlesVersion": { "type": "string" },
+    "title": { "type": "string" },
+    "state": { 
+      "type": "string", 
+      "enum": ["Intake", "Normalize", "Classify", "Plan", "Execute", "PendingExternal", "Evaluate", "Resolve", "Postmortem"] 
+    },
+    "formal": {
+      "type": "object",
+      "properties": {
+        "expected": { "type": "string" },
+        "actual": { "type": "string" },
+        "definitions": { "type": "object" }
+      }
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "enum": ["Open", "Validated", "Disproven"] },
+          "evidenceRefs": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["id", "description", "status"]
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "ask": { "type": "string" },
+          "required": { "type": "boolean" },
+          "status": { "enum": ["Open", "Answered"] },
+          "answer": { "type": "string" },
+          "expectedFormat": { "enum": ["text", "json", "path"] }
+        },
+        "required": ["id", "ask", "status"]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "type": "string" },
+          "path": { "type": "string" },
+          "hash": { "type": "string" },
+          "extracts": { 
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "summary": { "type": "string" }
+              }
+            }
+          }
+        },
+        "required": ["id", "path", "hash"]
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ts": { "type": "string" },
+          "type": { "type": "string" },
+          "detail": { "type": "string" }
+        },
+        "required": ["ts", "type"]
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "verdict": { "type": "string" },
+        "explanation": { "type": "string" },
+        "evidenceRefs": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "required": ["id", "state", "events"]
+}

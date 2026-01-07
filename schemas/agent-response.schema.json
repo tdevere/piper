@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "thoughtProcess": { "type": "string" },
+    "newHypotheses": { "type": "array", "items": { "$ref": "case.schema.json#/properties/hypotheses/items" } },
+    "newQuestions": { "type": "array", "items": { "$ref": "case.schema.json#/properties/questions/items" } },
+    "recommendedState": { "type": "string" },
+    "outcome": { "$ref": "case.schema.json#/properties/outcome" }
+  },
+  "required": ["thoughtProcess"]
+}

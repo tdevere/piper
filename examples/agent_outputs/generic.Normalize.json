@@ -1,0 +1,13 @@
+{
+  "thoughtProcess": "The logs indicate a 401 Unauthorized error. This usually means the Service Connection is expired or the build identity lacks permission.",
+  "newQuestions": [
+    { 
+      "id": "q2", 
+      "ask": "Have you verified the Service Connection is authorized in Project Settings?", 
+      "required": true, 
+      "status": "Open", 
+      "expectedFormat": "text" 
+    }
+  ],
+  "recommendedState": "Normalize"
+}
