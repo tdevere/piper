@@ -1,6 +1,28 @@
-# PipelineExpert - AI-Powered Troubleshooting Assistant
+# P.I.P.E.R - **P**ipeline **I**ntelligent **P**roblem **E**xpert & **R**esolver
 
 An intelligent troubleshooting system powered by a multi-agent AI architecture for systematic investigation of Azure DevOps pipeline failures, deployment issues, and infrastructure problems.
+
+---
+
+## 📋 Prerequisites & Best Experience
+
+**For the best experience, use P.I.P.E.R within VS Code with GitHub Copilot integration:**
+
+### Required Setup
+- **VS Code** with GitHub Copilot extension installed
+- **GitHub Copilot CLI** - Install via `winget install GitHub.Copilot` ([docs](https://github.com/github/copilot-cli))
+- **Copilot Tool Access** - Allow GitHub Copilot to use P.I.P.E.R tools in VS Code chat
+- **Authentication** - Launch `copilot`, type `/login` to authenticate, and persist credentials
+
+### System Requirements
+- **Operating System:** Windows (tested platform)
+- **Runtime:** Node.js 18+ 
+- **Shell:** PowerShell (required for terminal operations)
+- **AI Provider:** GitHub Copilot (LLM_PROVIDER=copilot)
+
+> ⚠️ **Note:** P.I.P.E.R is currently tested and optimized for Windows environments. Other platforms may require modifications to shell commands and path handling.
+
+---
 
 ## 🚀 Quick Start
 
