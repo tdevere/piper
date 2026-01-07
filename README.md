@@ -141,8 +141,12 @@ Q: Have you verified the Service Connection is authorized?
 
 ### Setup
 ```bash
-# Install GitHub Copilot CLI
-gh extension install github/gh-copilot
+# Install copilot-auto (VS Code extension with CLI wrapper)
+# See: https://github.com/tdevere/copilot-auto
+
+# Configure for copilot-auto (default)
+echo "LLM_ENABLED=true" >> .env
+echo "LLM_PROVIDER=copilot-auto" >> .env
 
 # Or configure OpenAI
 echo "LLM_ENABLED=true" >> .env

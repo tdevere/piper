@@ -3,8 +3,11 @@
 ## Setup
 
 ```bash
-# Install GitHub Copilot CLI
-gh extension install github/gh-copilot
+# Install copilot-auto (VS Code Copilot CLI wrapper)
+# See: https://github.com/tdevere/copilot-auto
+
+# Configure for copilot-auto (default)
+echo "LLM_ENABLED=true\nLLM_PROVIDER=copilot-auto" > .env
 
 # Or configure OpenAI
 echo "LLM_ENABLED=true\nLLM_PROVIDER=openai\nOPENAI_API_KEY=sk-..." > .env
@@ -86,10 +89,13 @@ piper agent-resume xyz789
 
 ## Troubleshooting
 
-### "GitHub Copilot CLI not available"
+### "copilot-auto not available"
 ```bash
-gh extension install github/gh-copilot
-gh copilot --version
+# Verify copilot-auto is installed and in PATH
+copilot-auto --version
+
+# Check .env configuration
+cat .env | grep LLM_
 ```
 
 ### "Session not found"

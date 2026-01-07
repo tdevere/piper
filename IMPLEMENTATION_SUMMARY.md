@@ -22,7 +22,7 @@ Successfully implemented a complete persistent agent architecture for the Piper 
 
 3. **src/agents/CopilotAgentBridge.ts** (227 lines)
    - GitHub Copilot CLI wrapper with persistent process support
-   - Spawns `gh copilot suggest` with conversation context
+   - Calls `copilot-auto` with conversation context
    - Safety controls (iteration/time limits, denied actions)
    - Event emission for monitoring
    - Availability checking
@@ -107,7 +107,7 @@ Successfully implemented a complete persistent agent architecture for the Piper 
    - Validates gates before transition
 
 #### 5. Multi-Provider LLM Support
-- **GitHub Copilot CLI**: Primary provider (via `gh copilot suggest`)
+- **copilot-auto**: Primary provider (VS Code Copilot CLI wrapper)
 - **OpenAI API**: Direct API integration with streaming
 - **Heuristics**: Fallback pattern matching
 - Configurable via `.env` file
@@ -251,7 +251,7 @@ None! All required dependencies were already in `package.json`:
 
 ### Next Steps (Future Enhancements)
 
-1. **Test with real Copilot CLI** - Requires `gh copilot` installation
+1. **Test with copilot-auto** - Requires `copilot-auto` installation
 2. **Multi-agent coordination** - Multiple agents on same case
 3. **Agent learning** - Learn from past successful resolutions
 4. **Custom tools** - Allow agents to call external APIs/scripts
