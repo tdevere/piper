@@ -1,0 +1,38 @@
+{
+  "id": "basic-info-to-collect",
+  "title": "Basic info to collect",
+  "description": "Customer-facing scoping questionnaire for Artifacts issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Artifacts",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Artifacts/Artifacts-scoping.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "AzDev Services Org Name: `dev.azure.com/<ORG NAME>`",
+        "Azure Billing Sub GUID:",
+        "AAD GUID/Entra ID:",
+        "Affected User VSID:",
+        "Issue: (Clear description of the issue `(What,when,where,who,why)`, including any error messages the customer receives)",
+        "## Impact",
+        "## Feed and Package details",
+        "## Evidence"
+      ]
+    }
+  ],
+  "totalRequiredFields": 8
+}

@@ -1,0 +1,42 @@
+{
+  "id": "auditing",
+  "version": "1.0.0",
+  "name": "Details needed",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "release",
+    "git",
+    "repo",
+    "access",
+    "azure-devops",
+    "devops",
+    "details",
+    "needed"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "authentication",
+      "permissions"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "Specific user(s)?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.019Z",
+    "updatedAt": "2026-01-07T18:11:39.019Z"
+  }
+}

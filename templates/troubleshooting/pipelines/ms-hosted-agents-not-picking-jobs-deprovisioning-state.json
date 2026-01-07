@@ -1,0 +1,50 @@
+{
+  "id": "ms-hosted-agents-not-picking-jobs-deprovisioning-state",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "general",
+    "agent",
+    "yaml",
+    "access",
+    "devops",
+    "scenario"
+  ],
+  "errorPatterns": [
+    "GET"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "General",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Customer may face this issue in case if the MS Hosted agents have gone in 'Deprovisioning' state.",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Distributed Task/Agents/Get",
+      "url": "https://learn.microsoft.com/rest/api/azure/devops/distributedtask/agents/get?view=azure-devops-rest-7.1"
+    },
+    {
+      "title": "Distributed Task/Agents/Update",
+      "url": "https://learn.microsoft.com/rest/api/azure/devops/distributedtask/agents/update?view=azure-devops-rest-7.1"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.846Z",
+    "updatedAt": "2026-01-07T18:11:38.846Z"
+  }
+}

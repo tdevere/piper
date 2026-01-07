@@ -1,0 +1,51 @@
+{
+  "id": "tsg-exclusivelock-issues",
+  "version": "1.0.0",
+  "name": "Issue:",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "release",
+    "agent",
+    "deployment",
+    "sprint",
+    "test",
+    "server",
+    "devops",
+    "issue:"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "failure"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Customer may face such issue if they have added validation at the agent pool level. This can be viewed from Project Settings -> Azure Pipelines (agent pool name) -> Approvals and Checks.",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Support for sequential deployments rather than latest only when using exclusive lock checks",
+      "url": "https://learn.microsoft.com/azure/devops/release-notes/2021/sprint-190-update#azure-pipelines-1"
+    },
+    {
+      "title": "Define approvals and checks/ExclusiveLock",
+      "url": "https://learn.microsoft.com/azure/devops/pipelines/process/approvals?view=azure-devops&preserve-view=true&tabs=check-pass#exclusive-lock"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.869Z",
+    "updatedAt": "2026-01-07T18:11:38.869Z"
+  }
+}

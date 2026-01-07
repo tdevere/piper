@@ -1,0 +1,41 @@
+{
+  "id": "org-not-listed-in-visual-studio-profile-or-ide",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "general",
+    "query",
+    "access",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "errorPatterns": [
+    "VSO",
+    "VSO"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "General",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.971Z",
+    "updatedAt": "2026-01-07T18:11:38.971Z"
+  }
+}

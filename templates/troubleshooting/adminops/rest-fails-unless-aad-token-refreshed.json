@@ -1,0 +1,45 @@
+{
+  "id": "rest-fails-unless-aad-token-refreshed",
+  "version": "1.0.0",
+  "name": "Scenario:",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "administration",
+    "authentication",
+    "identity",
+    "token",
+    "azure-devops",
+    "devops",
+    "scenario:"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Administration",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "authentication"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Managed Identities and Service Principal",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/service-principal-managed-identity?view=azure-devops"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.014Z",
+    "updatedAt": "2026-01-07T18:11:39.014Z"
+  }
+}

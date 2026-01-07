@@ -1,0 +1,38 @@
+{
+  "id": "azure-test-plans-quick-sla-guide",
+  "title": "Azure Test Plans Quick SLA Guide",
+  "description": "Customer-facing scoping questionnaire for Test Plans issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Test Plans",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Test-Plans/Azure-Test-Plans-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "Evidence\n  Capture annotated screenshots (or a short screen recording) showing the exact error or irregular UI behavior.",
+        "Impact\n  Note how many users are affected.",
+        "Onset & Frequency\n  Record when the problem started (date/time) and whether it’s consistent or intermittent.",
+        "Environment & IDs\n  Include: Organization (or Collection), Azure DevOps Services/Server version, and the Test Plan, Test Suite, and Test Case IDs.",
+        "Reproduction Steps\n  List every action in order—one per line—numbered 1, 2, 3… Include the expected vs actual result after each step.",
+        "Automation Status\n  Specify whether the test is Manual or Automated (and include pipeline/build IDs if automated).\n  If the case has enough information to know automation then collect diagnositc pipeline logs.",
+        "Diagnostics for UI Issues\n  Attach a HAR (network) trace and browser console logs.",
+        "Reporting issues\n  Capture the URL used to the pull the report along with the"
+      ]
+    }
+  ],
+  "totalRequiredFields": 8
+}

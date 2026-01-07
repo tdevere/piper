@@ -1,0 +1,50 @@
+{
+  "id": "tags-missing-from-devops-resources-in-azure-or-incorrect-org-region-reported",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "release",
+    "agent",
+    "repo",
+    "access",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "errorPatterns": [
+    "VSO",
+    "TIMESTAMP"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "See public documentation",
+      "url": "https://docs.microsoft.com/en-us/azure/devops/organizations/billing/billing-faq?view=azure-devops&ns-enrollment-id=bookmarks#q--how-can-i-split-azure-devops-charges-by-organization"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.988Z",
+    "updatedAt": "2026-01-07T18:11:38.988Z"
+  }
+}

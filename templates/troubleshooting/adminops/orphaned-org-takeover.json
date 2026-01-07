@@ -1,0 +1,45 @@
+{
+  "id": "orphaned-org-takeover",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "server",
+    "access",
+    "tfs",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Server",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "failure",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "here",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/resolve-orphaned-organization?view=azure-devops"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.030Z",
+    "updatedAt": "2026-01-07T18:11:39.030Z"
+  }
+}

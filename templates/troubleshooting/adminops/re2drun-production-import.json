@@ -1,0 +1,36 @@
+{
+  "id": "re2drun-production-import",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "server",
+    "query",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Server",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.036Z",
+    "updatedAt": "2026-01-07T18:11:39.036Z"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "adminops-scoping",
+  "version": "1.0.0",
+  "name": "Overview",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "administration",
+    "permission",
+    "access",
+    "devops",
+    "overview"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Administration",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "permissions"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "How many users are impacted?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q2",
+      "ask": "Are the users blocked due to the issue or is there a workaround?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q3",
+      "ask": "Is the affected user a PCA or Project Admin?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q4",
+      "ask": "Has anything changed for this user on the Entra side (UPN changes, UPN recreated in Entra, password changes, etc.)?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q5",
+      "ask": "Does the affected user have the necessary license (Basic, VS Subscriber) to access the resource?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Capture a browser trace for troubleshooting",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/user-guide/capture-browser-trace?view=azure-devops&tabs=microsoft-edge"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.960Z",
+    "updatedAt": "2026-01-07T18:11:38.960Z"
+  }
+}

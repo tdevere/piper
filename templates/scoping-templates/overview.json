@@ -1,0 +1,51 @@
+{
+  "id": "overview",
+  "title": "Overview",
+  "description": "Customer-facing scoping questionnaire for AdminOps issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "AdminOps",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/AdminOps/AdminOps-Scoping.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "AzDev Services Org Name: `dev.azure.com/<ORG NAME>`",
+        "Azure Billing Sub GUID: (if not linked put N/A)",
+        "AAD GUID/Entra ID: (if not linked put n/a)",
+        "Affected User: (VSID of affected user)",
+        "Issue: (Clear description of the issue `(What,when,where,who,why)`, including any error messages the customer receives)",
+        "How many users are impacted?",
+        "When did the issue start?",
+        "Are the users blocked due to the issue or is there a workaround?",
+        "Does the behavior reproduce when signing in directly to the org from an inPrivate/incognito browser?",
+        "Is the affected user a PCA or Project Admin?",
+        "Is the user an Entra guest?",
+        "Has anything changed for this user on the Entra side (UPN changes, UPN recreated in Entra, password changes, etc.)?",
+        "Does the affected user have the necessary permissions to access the resource? Be sure to look up the user's direct permissions, not the permissions of any groups the user may belong to.",
+        "Does the affected user have the necessary license (Basic, VS Subscriber) to access the resource?",
+        "Does the affected user have the necessary permissions on the Azure Subscription, if applicable?",
+        "URL of the page",
+        "Screenshot or video/gif demonstrating the issue",
+        "F12 network trace or Fiddler (https://aka.ms/DevOpsHAR)",
+        "Screenshot of User policies",
+        "Screenshot from aex.dev.azure.com",
+        "Audit logs"
+      ]
+    }
+  ],
+  "totalRequiredFields": 21
+}

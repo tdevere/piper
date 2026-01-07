@@ -1,0 +1,48 @@
+{
+  "id": "azure-devops-server-quick-sla-guide",
+  "title": "🛠️ Azure DevOps SERVER Quick SLA Guide",
+  "description": "Customer-facing scoping questionnaire for Azure DevOps Server issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Azure DevOps Server",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Azure-DevOps-Server/Azure-DevOps-Server-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "DevOps Server / TFS Version (with patch level)",
+        "Number of Application Tiers",
+        "Operating System Versions - Application Tier",
+        "Number of Data Tiers",
+        "Operating System Versions - Data Tier",
+        "SQL Version(s)",
+        "SQL Always On (Yes/No)",
+        "Load Balancer (Yes/No)",
+        "VM or Physical Machine hosting the App Tier?",
+        "Hyper-V or Cloud VM hosting the App Tier/Data Tier?",
+        "Installed on Azure IaaS or other cloud VM host?",
+        "Version of Azure Self-Hosted Build Agents",
+        "Issue Start Time",
+        "Previous Functionality\n  • Did this work previously, or has it never worked?",
+        "Proxy/VPN Usage\n  • Are you currently behind a proxy or VPN?",
+        "Migration History\n  • Have you recently migrated from a previous version of DevOps Server?\n  • If so, what version did you migrate from?",
+        "Domain Migration\n  • Have you recently undergone any type of domain migration that you are aware of?",
+        "Network / Firewall Changes\n  • Any recent type of network or firewall changes that may have taken place that you are aware of?"
+      ]
+    }
+  ],
+  "totalRequiredFields": 18
+}

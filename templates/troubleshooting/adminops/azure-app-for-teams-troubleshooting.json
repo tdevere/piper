@@ -1,0 +1,52 @@
+{
+  "id": "azure-app-for-teams-troubleshooting",
+  "version": "1.0.0",
+  "name": "Scenario 1",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "repo",
+    "work-item",
+    "board",
+    "identity",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "authentication",
+      "configuration"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "There is no pipelines app configuration issue it may be the organization auth issue.",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "here",
+      "url": "https://docs.microsoft.com/en-us/microsoftteams/log-files"
+    },
+    {
+      "title": "here",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/integrations/microsoft-teams?view=azure-devops#troubleshoot"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.010Z",
+    "updatedAt": "2026-01-07T18:11:39.010Z"
+  }
+}

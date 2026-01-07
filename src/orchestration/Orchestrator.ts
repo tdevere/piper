@@ -56,7 +56,16 @@ export class Orchestrator {
           const response = await this.llm.consult(c, 'default');
           
           // 5. Apply Agent Response
-          if (response.newHypotheses) c.hypotheses.push(...response.newHypotheses);
+          if (response.newHypotheses) {
+              // Map agent hypothesis format to our Hypothesis interface
+              const mappedHypotheses = response.newHypotheses.map((h: any) => ({
+                  id: h.id,
+                  description: h.description || h.hypothesis, // Support both field names
+                  status: 'Open' as const,
+                  evidenceRefs: []
+              }));
+              c.hypotheses.push(...mappedHypotheses);
+          }
           if (response.newQuestions) c.questions.push(...response.newQuestions);
           if (response.classification && !c.classification) c.classification = response.classification;
           
@@ -83,9 +92,52 @@ export class Orchestrator {
     // Generate initial troubleshooting report at Plan stage
     if (c.state === CaseState.Plan) {
       report = await this.generateTroubleshootingReport(c, report);
+      
+      // Save remediation plan to case metadata and as markdown file
+      await this.saveRemediationPlan(c, report);
     }
     
     return { state: c.state, report: report || undefined, autoProgressed };
+  }
+  
+  private async saveRemediationPlan(c: Case, fullReport: string): Promise<void> {
+    const fs = require('fs-extra');
+    const path = require('path');
+    
+    // Extract steps from the plan section of the report
+    const planMatch = fullReport.match(/🔧 REMEDIATION PLAN[\s\S]*?(?=━━━━━━━━|$)/);
+    const planText = planMatch ? planMatch[0] : fullReport;
+    
+    // Save markdown file
+    const casePath = path.join(process.cwd(), 'cases', c.id);
+    await fs.ensureDir(casePath);
+    await fs.writeFile(path.join(casePath, 'remediation-plan.md'), planText, 'utf-8');
+    
+    // Save to metadata as structured data
+    if (!c.metadata) c.metadata = {};
+    c.metadata.remediationPlan = {
+      timestamp: new Date().toISOString(),
+      agent: 'troubleshoot-agent',
+      rootCause: c.classification || 'Unknown',
+      steps: [], // Could parse from planText if needed
+      verificationSteps: [],
+      planMarkdown: planText
+    };
+    
+    // Save scope analysis to metadata
+    if (c.problemScope && !c.metadata.scopeAnalysis) {
+      c.metadata.scopeAnalysis = {
+        timestamp: c.problemScope.timestamp || new Date().toISOString(),
+        agent: 'scope-agent',
+        summary: c.problemScope.summary,
+        errorPatterns: c.problemScope.errorPatterns,
+        affectedComponents: c.problemScope.affectedComponents,
+        impact: c.problemScope.impact,
+        confidence: 85 // Default confidence for AI-generated scope
+      };
+    }
+    
+    await this.store.save(c);
   }
   
   private async generateTroubleshootingReport(c: Case, agentThoughts: string): Promise<string> {
@@ -381,7 +433,7 @@ YOUR REMEDIATION PLAN:`;
     return await this.generateTroubleshootingReport(c, 'Preliminary analysis based on available evidence');
   }
 
-  async generateProblemScope(caseId: string): Promise<{
+  async generateProblemScope(caseId: string, userFeedback?: string): Promise<{
     summary: string;
     errorPatterns: string[];
     affectedComponents: string[];
@@ -412,6 +464,11 @@ YOUR REMEDIATION PLAN:`;
     
     console.log(chalk.gray(`   🤖 Preparing AI analysis prompt...`));
     
+    const feedbackSection = userFeedback ? `\n\nUSER FEEDBACK ON PREVIOUS SCOPE:
+${userFeedback}
+
+Please regenerate the problem scope incorporating this feedback.` : '';
+    
     const prompt = `You are an Azure DevOps troubleshooting expert. Analyze the evidence and create a detailed problem scope.
 
 INITIAL PROBLEM REPORT:
@@ -426,6 +483,7 @@ KEY EVIDENCE CONTENT (first 20000 chars from redacted files):
 ${evidenceContent.substring(0, 20000)}
 
 ${contextFindings ? `\nCONTEXT ANALYSIS FINDINGS:\n${contextFindings.criticalIssues.map((issue: any) => `- ${issue.rule}: ${issue.matches.length} occurrences`).join('\n')}` : ''}
+${feedbackSection}
 
 Create a detailed problem scope with:
 

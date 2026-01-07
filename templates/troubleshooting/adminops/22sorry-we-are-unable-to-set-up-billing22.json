@@ -1,0 +1,45 @@
+{
+  "id": "22sorry-we-are-unable-to-set-up-billing22",
+  "version": "1.0.0",
+  "name": "%22Sorry,-we-are-unable-to-set-up-billing%22",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "repos",
+    "repo",
+    "access",
+    "security",
+    "azure-devops",
+    "devops",
+    "%22sorry,-we-are-unable-to-set-up-billing%22"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Could be any number of things",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "customer's allow list on their network",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/organizations/security/allow-list-ip-url"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.979Z",
+    "updatedAt": "2026-01-07T18:11:38.979Z"
+  }
+}

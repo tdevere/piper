@@ -1,0 +1,43 @@
+{
+  "id": "github-enterprise-licenses-in-ado",
+  "version": "1.0.0",
+  "name": "Feature",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "repos",
+    "git",
+    "access",
+    "azure-devops",
+    "devops",
+    "feature"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Escalation Process - DTS & ICM",
+      "url": "https://aka.ms/CSSDevOpsESC"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.984Z",
+    "updatedAt": "2026-01-07T18:11:38.984Z"
+  }
+}

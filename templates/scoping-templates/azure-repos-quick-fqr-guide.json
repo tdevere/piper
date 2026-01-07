@@ -1,0 +1,46 @@
+{
+  "id": "azure-repos-quick-fqr-guide",
+  "title": "Azure Repos Quick FQR Guide",
+  "description": "Customer-facing scoping questionnaire for Repos issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Repos/Azure-Repos-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "What is the name of the organization or version of ADO Server?",
+        "Which project(s) are impacted?",
+        "Which team(s) are experiencing the issue?",
+        "When did the issue begin?",
+        "Has this worked in the past?",
+        "Is this affecting a single or multiple repos?",
+        "Is the issue for a Git repo or a TFVC repo?",
+        "What is the name and URL of the affected repo?",
+        "Is this affecting all branches? What are the affected branches?",
+        "Are there any error messages you can share? Please provide a screenshot, and/or the full text of the error.",
+        "Please provide a detailed description of the issue (if not already provided in the ticket).",
+        "For Git Repos capture a verbose git trace:\n  • Command example: `GIT_CURL_VERBOSE=1 git clone https://github.com/example/repo.git`",
+        "What are the permissions for the affected user at the project/repo/branch levels?",
+        "Does the issue reproduce when performing the operation using Git command line?",
+        "Are you currently behind a proxy or VPN?",
+        "For TFSVc systems confirm if there is an Azure DevOps Proxy Server in use."
+      ]
+    }
+  ],
+  "totalRequiredFields": 16
+}

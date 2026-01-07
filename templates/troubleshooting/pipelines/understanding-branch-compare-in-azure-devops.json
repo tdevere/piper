@@ -1,0 +1,41 @@
+{
+  "id": "understanding-branch-compare-in-azure-devops",
+  "version": "1.0.0",
+  "name": "Understanding Branch Compare in Azure DevOps",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "release",
+    "git",
+    "repository",
+    "repo",
+    "branch",
+    "azure-devops",
+    "devops",
+    "understanding",
+    "compare"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.870Z",
+    "updatedAt": "2026-01-07T18:11:38.870Z"
+  }
+}

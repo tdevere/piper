@@ -1,80 +1,209 @@
-# Piper - Systematic Troubleshooting CLI
+# PipelineExpert - AI-Powered Troubleshooting Assistant
 
-A systematic troubleshooting tool with AI-powered persistent agents for evidence-based investigation of deployment failures, pipeline issues, and infrastructure problems.
+An intelligent troubleshooting system powered by a multi-agent AI architecture for systematic investigation of Azure DevOps pipeline failures, deployment issues, and infrastructure problems.
 
-## Features
+## 🚀 Quick Start
 
-### 🎯 Systematic Investigation
-- **Template-based workflows** - Pre-defined investigation paths for common issues
-- **Evidence management** - Automated log ingestion with PII redaction
-- **State machine** - Deterministic progression with validation gates
-- **Strict mode** - Enforces question answering before state transitions
-
-### 🤖 Persistent AI Agents
-- **Autonomous investigation** - Agents work through diagnostic questions systematically
-- **Template-derived personality** - Domain expertise from issue templates
-- **Safety controls** - Iteration limits, time limits, action approval
-- **Conversation persistence** - Resume investigations across sessions
-
-### 📦 Evidence Processing
-- **ZIP extraction** - Automatic extraction to staging area
-- **🔒 PII redaction** - Automatic detection and removal of sensitive data
-  - Emails, IPs, API keys, tokens, connection strings
-  - Azure/AWS/GitHub credentials protected
-  - Pre-redaction before AI analysis
-- **Template matching** - Auto-identifies issue types from logs
-- **Multi-file analysis** - Processes entire log collections
-
-### 💡 Interactive User Guidance
-- **Help system** - Type `help` to see verification steps for any question
-- **Examples** - Type `example` to see sample answers
-- **Evidence verification** - "Trust but verify" with file-backed answers
-- **Retry-friendly** - Clear error messages with guidance on how to fix
-
-### ✅ Validation & Control
-- **Required questions** - Gates progression until critical info gathered
-- **Hypothesis tracking** - Evidence-based validation
-- **Event sourcing** - Complete audit trail
-- **Backup system** - Safe case deletion with restore capability
-
-## Quick Start
+**See it in action:** Check out [DEMO.md](docs/DEMO.md) for a complete walkthrough with realistic examples showing PII redaction and template learning.
 
 ### Installation
 ```bash
 npm install
 npm run build
 npm link  # Makes 'piper' globally available
+
+# Setup AI capabilities (required for full functionality)
+export LLM_ENABLED=true
+export LLM_PROVIDER=copilot
 ```
 
-### Basic Usage
-```bash
-# Create a case
-piper new "Deployment failed in production"
+---
 
-# Ingest evidence from logs
-piper ingest "Azure deployment failed" ./logs.zip
+## ✨ Features
+
+### 🤖 Multi-Agent AI Architecture
+- **7 Specialized Agents** - Each agent is an expert in one phase of troubleshooting
+  - **Intake Agent:** Triages evidence files and identifies missing information
+  - **Scope Agent:** Analyzes evidence to define problem scope and boundaries
+  - **Classify Agent:** Determines issue category and generates diagnostic hypotheses
+  - **Troubleshoot Agent:** Creates detailed remediation plans with verification steps
+  - **Resolve Agent:** Validates solution effectiveness and confirms resolution
+  - **Solution Agent:** Generates reusable KB articles and learns from resolved cases
+  - **Lead Agent:** Validates state transitions and ensures process compliance
+
+- **Dynamic Agent Routing** - State-driven agent selection with fallback strategies
+- **Evidence-First Analysis** - AI agents work with redacted, secure evidence
+- **Continuous Engagement** - Auto-progression through investigation workflow (`-a` flag)
+
+### 🎓 Template Learning System
+- **Auto-Improvement** - Creates refined templates from resolved cases
+- **Effectiveness Scoring** - Evaluates template accuracy (0-100 scale)
+- **Enable/Disable Control** - Manage learned templates without deletion
+- **Version Tracking** - Maintains template lineage and improvements
+- **Smart Matching** - Prioritizes high-confidence learned templates
+
+### 📦 Evidence Processing
+- **ZIP extraction** - Automatic extraction to staging area
+- **🔒 PII redaction** - Pre-analysis detection and removal of sensitive data
+  - Emails, IPs, API keys, tokens, connection strings
+  - Azure/AWS/GitHub credentials protected
+  - Restore capability for authorized troubleshooting
+- **Multi-file analysis** - Processes entire log collections
+- **Artifact tracking** - Original + redacted versions stored securely
+
+### 🧠 Intelligent Workflows
+- **Template-based investigation** - Pre-defined paths for common issues
+- **Hypothesis tracking** - Evidence-based validation of theories
+- **Interactive Q&A** - Diagnostic question collection with confirmation
+- **State machine** - Deterministic progression: Intake → Scope → Classify → Plan → Resolve
+- **Decision journal** - Complete audit trail of AI reasoning
+
+### 💾 Persistent Storage
+- **Dual Format Plans** - Both JSON metadata and markdown files
+- **Scope Analysis Archive** - AI-generated summaries with confidence scores
+- **Template Effectiveness Metrics** - Track which templates work best
+- **Event Sourcing** - Complete case history with restore capability
+
+---
+
+## 🏗️ Architecture
+
+### State Flow
+```
+┌─────────┐     ┌───────┐     ┌──────────┐     ┌──────┐     ┌─────────┐
+│ Intake  │ --> │ Scope │ --> │ Classify │ --> │ Plan │ --> │ Resolve │
+└─────────┘     └───────┘     └──────────┘     └──────┘     └─────────┘
+    ↓               ↓              ↓               ↓              ↓
+intake-agent   scope-agent   classify-agent  troubleshoot   solution-agent
+                                                  -agent
+```
+
+### Agent System
+
+Each agent has a specialized profile (`.profile.md`) containing:
+- **System Prompt** - Domain expertise and personality
+- **Response Schema** - Structured JSON output format
+- **Validation Rules** - Quality checks and constraints
+- **Fallback Strategy** - Pattern-based analysis if AI unavailable
+
+**Agent Profiles Location:** `agents/stage-agents/`
+
+### Data Model
+
+**Case Metadata Structure:**
+```typescript
+{
+  scopeAnalysis?: {
+    timestamp: string;
+    agent: 'scope-agent';
+    summary: string;
+    errorPatterns: string[];
+    affectedComponents: string[];
+    impact: string;
+    confidence: number; // 0-100
+  };
+  
+  remediationPlan?: {
+    timestamp: string;
+    agent: 'troubleshoot-agent';
+    rootCause: string;
+    steps: Array<{order, action, commands?, expectedOutcome}>;
+    verificationSteps: string[];
+    planMarkdown: string; // Full markdown version
+  };
+  
+  templateEffectiveness?: {
+    templateId: string;
+    accuracyScore: number; // 0-100
+    wasAccurate: boolean; // >= 70%
+    shouldCreateLearnedTemplate: boolean;
+  };
+}
+```
+
+**Template Learning Scoring:**
+- Classification match: 20 points
+- Hypothesis validation: 30 points (validated / total)
+- Question completion: 20 points
+- **Threshold:** Score < 70% triggers learned template creation
+
+---
+
+## 📖 Usage
+
+### Basic Commands
+```bash
+# Quick one-shot analysis (no interactive workflow)
+piper oneshot <file|folder|zip> "Problem description"
+piper oneshot logs.zip "Deploy timeout" --previous report.md -o analysis.md
+
+# Create a new case (full interactive workflow)
+piper new "Production deployment authentication failure"
+
+# Ingest evidence with AI analysis (auto-progression)
+piper ingest case.zip -a
+
+# Manual progression (if not using -a flag)
+piper next <case-id>
 
 # Show case details
 piper show <case-id>
 
-# Analyze evidence and suggest answers
-piper analyze <case-id>
+# Answer questions manually
+piper answer <case-id> q1 "Service principal exists in Azure AD"
 
-# Answer questions
-piper answer <case-id> q1 "DeploymentFailed error"
-
-# Progress case through states
-piper next <case-id>
+# Mark case resolved
+piper resolve <case-id> --notes "Federated credential was missing"
 ```
+
+### Template Management
+```bash
+# List all templates
+piper templates                          # List all enabled templates
+piper templates --learned                # Show only learned templates
+piper templates --stats                  # Show statistics
+
+# View template details
+piper templates-show <template-id>       # Show full template information
+
+# Add/Import templates
+piper templates-add <file.json>          # Import template from JSON file
+
+# Export templates
+piper templates-export <id> <file.json>  # Export template for sharing
+
+# Enable/Disable templates
+piper templates-disable <template-id>    # Soft delete (can be re-enabled)
+piper templates-enable <template-id>     # Re-enable disabled template
+
+# Permanently remove
+piper templates-remove <template-id>     # Hard delete (requires confirmation)
+piper templates-remove <template-id> -f  # Force delete without prompt
+```
+
+### Evidence Commands
+```bash
+# List evidence artifacts
+piper evidence <case-id>
+
+# Show PII redaction map
+piper evidence <case-id> --show-redactions
+
+# Restore original PII (requires confirmation)
+piper evidence <case-id> --restore-pii
+```
+
+---
 
 ## 🔒 PII Protection & Security
 
-**Automatic PII Redaction** - All evidence is automatically scanned and redacted before storage or AI analysis.
+**Automatic PII Redaction** - All evidence is scanned and redacted before storage or AI analysis.
 
 ### What Gets Protected?
-- ✅ Email addresses → `[REDACTED-EMAIL]`
-- ✅ IP addresses → `[REDACTED-IP]`
-- ✅ API keys & tokens → `[REDACTED-TOKEN]`
+- ✅ Email addresses → `████████@domain.com`
+- ✅ IP addresses → `████.████.█.███`
+- ✅ GUIDs/UUIDs → `████████-████-████-████-████████████`
+- ✅ API keys & tokens → `[REDACTED_TOKEN]`
 - ✅ Azure/AWS credentials → `[REDACTED]`
 - ✅ Connection strings → Fully redacted
 - ✅ Private keys → `[REDACTED-PRIVATE-KEY]`
@@ -92,9 +221,85 @@ Added evidence xyz789 (WARNING: PII Detected and Redacted)
 # User: [REDACTED-EMAIL], Key: [REDACTED-API-KEY]
 ```
 
-**AI Safety:** All evidence is pre-redacted before being sent to OpenAI, GitHub Copilot, or Azure OpenAI.
+**AI Safety:** All evidence is pre-redacted before being sent to AI agents, ensuring no sensitive data leaves your environment.
 
-📖 **Full documentation:** [docs/PII-PROTECTION.md](docs/PII-PROTECTION.md) | [PII-USER-GUIDE.md](PII-USER-GUIDE.md)
+📖 **Full documentation:** [PII-USER-GUIDE.md](docs/guides/PII-USER-GUIDE.md) | [docs/PII-PROTECTION.md](docs/PII-PROTECTION.md)
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+```bash
+# AI Agent Configuration (required for full functionality)
+export LLM_ENABLED=true               # Enable AI agents
+export LLM_PROVIDER=copilot           # Use GitHub Copilot CLI
+
+# Optional overrides
+export COPILOT_PATH=/custom/path/copilot  # Custom copilot binary location
+```
+
+### Requirements
+
+**For AI-Powered Features:**
+- GitHub Copilot CLI installed: `gh extension install github/gh-copilot`
+- Authenticated GitHub account with Copilot access
+- `copilot` command available in PATH
+
+**Verification:**
+```bash
+# Test copilot is working
+copilot -p "Say hello" --allow-all-tools
+
+# Should return a response from GitHub Copilot
+```
+
+**Fallback Mode:**
+If `LLM_ENABLED=false` or copilot is unavailable, system uses pattern-based fallback:
+- Classification by error pattern matching
+- Basic plan generation from templates
+- Resolution detection by keywords
+
+---
+
+## 🎓 How Template Learning Works
+
+PipelineExpert improves automatically by learning from resolved cases:
+
+1. **Resolution Analysis**
+   - When you mark a case resolved, the solution-agent evaluates effectiveness
+   - Scores template accuracy: classification (20%), hypothesis validation (30%), questions (20%)
+   - Overall score: 0-100 scale
+
+2. **Auto-Creation Decision**
+   - If score < 70%: Creates improved learned template
+   - If no template matched: Creates new template from case patterns
+   - Enabled by default, can be disabled later
+
+3. **Learned Template Contents**
+   - Refined diagnostic questions (max 8, validated ones only)
+   - Validated hypotheses (max 5, evidence-backed)
+   - Error patterns extracted from evidence
+   - Keywords from problem scope and classification
+
+4. **Template Priority**
+   - Learned templates with high confidence ranked higher in matching
+   - Original templates remain available as fallback
+   - Disabled templates excluded from matching
+
+**Example:**
+```
+Case resolved: WIF authentication failure
+├─ Original template: authentication-wif-v1 (score: 72%)
+├─ Analysis: Classification accurate, 4/5 hypotheses validated
+├─ Improvement: Added question about federated credentials
+└─ Result: learned-c4a7b9d2-v1 created and enabled
+
+Next similar case: Learned template matched first, resolved 40% faster
+```
+
+---
 
 ## 💡 Interactive User Guidance
 
@@ -106,69 +311,30 @@ Added evidence xyz789 (WARNING: PII Detected and Redacted)
 |---------|-------------|
 | `help` or `?` | Shows step-by-step verification instructions |
 | `example` | Shows sample answers |
-| `<file-path>` | Ingests evidence file (with PII redaction) |
-| `<text-answer>` | Provides text response |
-| `Enter` (blank) | Skips question |
+| `y` / `n` | Confirms or rejects auto-extracted answer |
+| `e` | Edits the suggested answer |
+| `u` | Marks answer as unknown |
+| `<text>` | Provides custom text response |
 
 ### Example Session
 ```bash
-$ piper analyze abc123
+$ piper ingest case.zip -a
 
-Q: Have you verified the Service Connection is authorized?
-   [q2] REQUIRED
-   ⚠️  Evidence required - "trust but verify"
-   Answer: help
+🤖 Consulting scope-agent...
 
-   📚 HOW TO VERIFY:
-   1. Navigate to Azure DevOps → Project Settings
-   2. Click 'Service Connections'
-   3. Check 'Security' tab for authorization
-   4. Take screenshot showing status
-   
-   📁 EVIDENCE REQUIRED:
-   - Provide file path to screenshot or log
+❓ Question 1 of 4 (REQUIRED)
 
-   Answer: ./screenshots/service-connection.png
-   
-   ✓ Evidence captured: service-connection.png
-   ⚠️  PII detected and redacted
-   ✓ Answer linked to evidence
+Does the service principal still exist in Azure AD?
+
+Suggested answer (from evidence): "yes"
+
+Confirm this answer? (Y/n/e=edit/u=unknown): y
+   ✓ Answer recorded
+
+Continuing workflow...
 ```
 
-📖 **Full documentation:** [SUMMARY.md](SUMMARY.md) | [demo-interactive-help.md](demo-interactive-help.md)
-
-## Persistent Agent System
-
-### Setup
-```bash
-# Install copilot-auto (VS Code extension with CLI wrapper)
-# See: https://github.com/tdevere/copilot-auto
-
-# Configure for copilot-auto (default)
-echo "LLM_ENABLED=true" >> .env
-echo "LLM_PROVIDER=copilot-auto" >> .env
-
-# Or configure OpenAI
-echo "LLM_ENABLED=true" >> .env
-echo "LLM_PROVIDER=openai" >> .env
-echo "OPENAI_API_KEY=sk-your-key" >> .env
-```
-
-### Agent Commands
-```bash
-# Create agent session
-piper agent-start <case-id> [--maxIterations 50] [--maxDuration 30]
-
-# Run agent interactively (approve each action)
-piper agent-run <session-id>
-
-# Run agent autonomously (auto-approve all)
-piper agent-run <session-id> --autoApprove
-
-# Monitor active agents
-piper agent-status
-
-# Control agents
+📖 **Full walkthrough:** [DEMO.md](docs/DEMO.md)
 piper agent-pause <session-id>
 piper agent-resume <session-id>
 piper agent-terminate <session-id>
@@ -181,56 +347,112 @@ piper ingest "Deployment failed with quota error" logs.zip
 # → Case ID: a525126d
 
 # 2. Start agent
-piper agent-start a525126d --maxIterations 100
-# → Session: 32b006c1-...
-
-# 3. Run agent
-piper agent-run 32b006c1-... --autoApprove
-
-# Agent autonomously:
-# - Analyzes evidence
-# - Answers diagnostic questions
-# - Tests hypotheses
-# - Progresses case state
-# - Tracks metrics
-
-# 4. Check results
-piper show a525126d
-```
-
-## Commands Reference
+## 📚 Commands Reference
 
 ### Case Management
 ```bash
 piper new <title>                    # Create new case
+piper ingest <zipPath> -a            # Ingest evidence with auto-analysis
 piper show <id>                      # Display case details
 piper list [--state <state>]         # List cases
+piper next <id>                      # Manually progress to next state
+piper resolve <id> --notes <text>    # Mark case resolved
 piper clear                          # Delete all cases (with backup)
 ```
 
-### Evidence
+### Template Management
 ```bash
-piper ingest <problem> <zipPath>     # Ingest logs from ZIP
-piper add-evidence <id> <filePath>   # Add evidence file
+piper templates list                 # List all templates
+piper templates --stats              # Show statistics (learned, enabled, disabled)
+piper templates disable <id>         # Disable a learned template
+piper templates enable <id>          # Re-enable a template
+```
+
+### Evidence Commands
+```bash
+piper evidence <id>                  # List case evidence
+piper evidence <id> --show-redactions # View PII redaction map
+piper evidence <id> --restore-pii    # Restore original PII (requires auth)
+piper add-evidence <id> <filePath>   # Add evidence to existing case
 ```
 
 ### Investigation
 ```bash
-piper analyze <id>                   # AI-powered question answering
-piper answer <id> <qid> <answer>     # Answer question manually
-piper next <id>                      # Progress to next state
-piper resume <id>                    # Resume after external wait
+piper answer <id> <qid> <answer>     # Answer question manually (if not using -a)
+piper resume <id>                    # Resume after external investigation
 ```
 
-### Agent Operations
-```bash
-piper agent-start <caseId>           # Create agent session
-piper agent-run <sessionId>          # Run agent
-piper agent-status                   # List active agents
-piper agent-pause <sessionId>        # Pause agent
-piper agent-resume <sessionId>       # Resume agent
-piper agent-terminate <sessionId>    # Stop agent permanently
+---
+
+## 🗂️ Project Structure
+
 ```
+PipelineExpert/
+├── src/
+│   ├── agents/              # Multi-agent system
+│   │   ├── AgentRunner.ts   # Agent execution engine
+│   │   ├── CopilotAgentBridge.ts  # Copilot CLI integration
+│   │   └── types.ts         # Agent interfaces
+│   ├── orchestration/       # State machine & workflow
+│   │   ├── Orchestrator.ts  # Main orchestrator
+│   │   ├── StateMachine.ts  # State transitions
+│   │   └── IntakeParser.ts  # Evidence parsing
+│   ├── evidence/            # Evidence processing
+│   │   ├── EvidenceManager.ts
+│   │   └── Redactor.ts      # PII redaction engine
+│   ├── storage/
+│   │   └── CaseStore.ts     # Persistent storage
+│   ├── templates/
+│   │   └── TemplateManager.ts  # Template loading & learning
+│   ├── llm/
+│   │   └── LLMClient.ts     # AI integration layer
+│   └── cli.ts               # Command-line interface
+├── agents/
+│   └── stage-agents/        # Agent profiles
+│       ├── intake-agent.profile.md
+│       ├── scope-agent.profile.md
+│       ├── classify-agent.profile.md
+│       ├── troubleshoot-agent.profile.md
+│       ├── resolve-agent.profile.md
+│       ├── solution-agent.profile.md
+│       └── lead-agent.profile.md
+├── templates/
+│   ├── *.json               # Standard templates
+│   └── learned/             # Auto-generated learned templates
+├── cases/                   # Case storage (gitignored)
+│   └── {case-id}/
+│       ├── case.json        # Case metadata
+│       ├── artifacts/       # Evidence files (redacted)
+│       ├── remediation-plan.md  # Generated plan
+│       └── .redaction-map.json  # PII restore info
+└── docs/
+    ├── DEMO.md              # Complete walkthrough
+    ├── guides/
+    │   ├── PII-USER-GUIDE.md    # PII protection guide
+    │   └── QUICK-REFERENCE.md   # Command cheat sheet
+    └── PII-PROTECTION.md    # Technical PII details
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suite
+npm test -- redactor.test.ts
+npm test -- orchestrator.test.ts
+
+# Build and link for local testing
+npm run build
+npm link
+```
+
+---
+
+## 📖 Additional Documentation
 
 ## Case States
 
@@ -398,24 +620,97 @@ piper show a525126d
 piper agent-start abc123
 piper agent-run xyz789
 
-# Agent proposes action:
-🎯 Proposed Action:
-   Type: transition-state
-   Transition to state: Normalize
-   Impact: HIGH
+---
 
-Approve this action? [y/N] y
-✓ Action completed
+## 📖 Additional Documentation
+
+- **[DEMO.md](docs/DEMO.md)** - Complete walkthrough with fake data showing PII redaction
+- **[ONESHOT-GUIDE.md](docs/guides/ONESHOT-GUIDE.md)** - Quick analysis without full workflow
+- **[PII-USER-GUIDE.md](docs/guides/PII-USER-GUIDE.md)** - PII protection and redaction details
+- **[QUICK-REFERENCE.md](docs/guides/QUICK-REFERENCE.md)** - Command cheat sheet
+- **[docs/AGENT_ARCHITECTURE.md](docs/AGENT_ARCHITECTURE.md)** - Multi-agent system design
+- **[agents/stage-agents/](agents/stage-agents/)** - Agent profile specifications
+
+---
+
+## 🚦 Requirements
+
+- **Node.js 18+**
+- **npm or yarn**
+- **GitHub Copilot CLI** - Required for AI features: `gh extension install github/gh-copilot`
+- **GitHub account** with Copilot access
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! This project uses:
+- TypeScript with strict mode
+- Jest for testing
+- Conventional commits
+- ESLint + Prettier for code quality
+
+### Adding New Templates
+
+Create a new JSON file in `templates/`:
+```json
+{
+  "id": "my-template-v1",
+  "version": "1.0.0",
+  "name": "My Issue Type",
+  "description": "Description of when to use this template",
+  "keywords": ["keyword1", "keyword2"],
+  "errorPatterns": ["ERROR.*pattern", "AADSTS\\d+"],
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "Have you checked X?",
+      "required": true
+    }
+  ],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Possible cause A"
+    }
+  ],
+  "classification": "Configuration"
+}
 ```
 
-## Requirements
+### Creating Custom Agents
 
-- Node.js 18+
-- npm or yarn
-- GitHub CLI (for agent system)
-- GitHub Copilot CLI extension (optional)
+Agent profiles are markdown files with YAML frontmatter in `agents/stage-agents/`:
+```markdown
+---
+name: My Custom Agent
+role: specialist
+domain: my-domain
+stage: classify
+capabilities:
+  - pattern-matching
+  - hypothesis-generation
+---
 
-## Development
+# System Prompt
+
+You are an expert in my-domain. Your role is to...
+
+## Response Format
+
+Return JSON matching this schema:
+\`\`\`json
+{
+  "classification": "string",
+  "hypotheses": [...],
+  "confidence": 0-100
+}
+\`\`\`
+```
+
+---
+
+## 🛠️ Development
 
 ```bash
 # Build
@@ -427,27 +722,45 @@ npm run dev
 # Type check
 npm run typecheck
 
-# Link locally
+# Link locally for testing
 npm link
+
+# Run tests
+npm test
 ```
 
-## License
+---
 
-MIT
+## 📄 License
 
-## Contributing
+MIT License - see LICENSE file for details
 
-1. Fork the repository
-2. Create feature branch
-3. Implement changes
-4. Add tests
-5. Submit pull request
+---
 
-## Roadmap
+## 🛣️ Roadmap
 
-- [ ] Multi-agent coordination
-- [ ] Agent learning from past cases
+- [x] Multi-agent architecture with specialized roles
+- [x] Template learning from resolved cases
+- [x] PII detection and redaction
+- [x] Auto-progression workflow
 - [ ] Web UI for case visualization
 - [ ] Integration with ticketing systems (Jira, Azure DevOps)
-- [ ] Custom tool calling for agents
-- [ ] Agent templates marketplace
+- [ ] Advanced analytics and metrics dashboard
+- [ ] Template marketplace and sharing
+- [ ] Multi-provider AI support (Azure OpenAI, Anthropic)
+
+---
+
+## 🙏 Acknowledgments
+
+- GitHub Copilot CLI for AI integration
+- Azure DevOps community for troubleshooting insights
+- Contributors and early adopters
+
+---
+
+**Questions or Issues?**
+- 📖 Check [DEMO.md](docs/DEMO.md) for complete walkthrough
+- 🐛 Open an issue on GitHub
+- 💬 Start a discussion for feature requests
+

@@ -1,0 +1,53 @@
+{
+  "id": "edit-queue-build-configuration-permission",
+  "version": "1.0.0",
+  "name": "Scenarios",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "build",
+    "permission",
+    "security",
+    "server",
+    "devops",
+    "scenarios"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "failure",
+      "authentication",
+      "permissions",
+      "configuration"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "- The customer doesn't have the _**Edit queue build configuration**_ permission.",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Pipeline permissions reference",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops#pipeline-permissions-reference"
+    },
+    {
+      "title": "Queue-time variables",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/security/inputs?view=azure-devops#queue-time-variables"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.823Z",
+    "updatedAt": "2026-01-07T18:11:38.823Z"
+  }
+}

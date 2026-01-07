@@ -1,0 +1,43 @@
+{
+  "id": "azure-devops-analytics-widget-issues",
+  "title": "Azure DevOps Analytics/Widget Issues",
+  "description": "Customer-facing scoping questionnaire for Boards issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Boards",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Boards/Analytics-Widgets-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "Organization Name\n  What is the name of the organization?",
+        "Affected Project(s)\n  Which project(s) are impacted?",
+        "Affected Team(s)\n  Which team(s) are experiencing the issue?",
+        "Issue Description\n  A detailed description of the issue (if not already provided in the ticket).",
+        "Issue Start Time\n  When did the issue begin?",
+        "Previous Functionality\n  Did this functionality work previously, or has it never worked?",
+        "Error Details\n  What is the error message returned?\n  Do you have any screenshots of the error?",
+        "Network Trace\n  If possible, could you please capture a network trace using Fiddler or your browser's DevTools the issue? The resulting files can be uploaded to the provided File Transfer link:\n  • [Capture a browser trace for troubleshooting - Azure DevOps | Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/user-guide/capture-browser-trace?view=azure-devops&tabs=microsoft-edge)\n  • [How to collect a network trace | Microsoft Learn](https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-network-trace)",
+        "Widget Details *(if applicable)*\n  What is the name of the widget being used?\n  Can you please send a screenshot of its configuration?",
+        "Analytics/OData Report Details *(if applicable)*\n  Can you please send the queries used and the data returned?",
+        "Comparison Behavior\n  What is the behavior of the equivalent query or widget when used in a regular WI query?",
+        "Dashboard Type *(if applicable)*\n  Is the dashboard a project dashboard or a team dashboard?",
+        "Data Discrepancies *(if applicable)*\n  If you're seeing data discrepancies:\n  • Where are you seeing the discrepancies?\n  • How was the data obtained?\n  • Is the data only incorrect some of the time, or all of the time?\n  • Compared to what?"
+      ]
+    }
+  ],
+  "totalRequiredFields": 13
+}

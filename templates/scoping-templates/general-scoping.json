@@ -1,0 +1,56 @@
+{
+  "id": "general-scoping",
+  "title": "General scoping",
+  "description": "Customer-facing scoping questionnaire for Repos issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Repos/Advanced-Security/GHAzDO-Scoping-and-general-troubleshooting.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "AzDev Services Org Name: (dev.azure.com/<ORG NAME>)",
+        "Azure Billing Sub GUID: (if not linked put n/a)",
+        "AAD GUID: (if not linked put n/a)",
+        "Affected User: (if applicable, VSID of affected user)",
+        "Affected Project: (if applicable, project name)",
+        "Affected Pipeline: (if applicable, pipeline logs with debug enabled)",
+        "Affected Repository: (if applicable, repository)",
+        "Secret Type: (if applicable, (e.g., SEC101/123.Test)",
+        "Alert Type name: (specific to issue)",
+        "Alert Type",
+        "Dependency Scanning (if applicable)",
+        "Secret Scanning (if applicable)",
+        "Code Scanning (if applicable)",
+        "Task: (specific to issue)",
+        "Dependency Scanning (if applicable)",
+        "Code Scanning (if applicable)",
+        "If the issue is happening during pipeline, please provide pipeline logs by enabling system.debug to true:",
+        "If customer using self hosted agent, then agent traces as well, proxy details..:",
+        "For Code Scanning and Dependency Scanning results issues, provide the pipeline logs with debug enabled.",
+        "For code scanning ensure that the customer adds these variable for additional telemetry to help diagnose and investigate",
+        "For Secret Scanning push failures, provide git logs showing commit details and push failures:",
+        "Are the users blocked due to the issue or is there a workaround?",
+        "User permissions of the identity related to GitHub Advanced Security for Azure DevOps?",
+        "Does the affected user have the necessary permissions to access the resource? Be sure to look up the user's direct permissions, not the permissions of any groups the user may belong to. (Yes/No)",
+        "Note: Please ensure that for code scanning issues, you double-check if the code is currently supported by CodeQL. Additionally, secret scanning is supported by GHAzDO.",
+        "Check [Supported CodeQL](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/) and [Supported Secret](https://learn.microsoft.com/en-us/azure/devops/repos/security/github-advanced-security-secret-scanning?view=azure-devops#supported-secrets )"
+      ]
+    }
+  ],
+  "totalRequiredFields": 26
+}

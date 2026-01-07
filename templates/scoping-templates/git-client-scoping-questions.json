@@ -1,0 +1,56 @@
+{
+  "id": "git-client-scoping-questions",
+  "title": "Git Client Scoping Questions",
+  "description": "Customer-facing scoping questionnaire for Repos issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Repos/Repos-Scoping/Git-Client-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "Was the [Personal Access Token (PAT)](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows) valid and correctly configured?",
+        "Were the [SSH keys properly configured](https://learn.microsoft.com/azure/devops/repos/git/use-ssh-keys-to-authenticate?view=azure-devops) and added to the Azure DevOps account?",
+        "Did the user have the necessary permissions to access the repository?\n  1. [Default](https://learn.microsoft.com/azure/devops/organizations/security/default-git-permissions?view=azure-devops)\n  2. [Download permission report](https://learn.microsoft.com/azure/devops/organizations/security/download-permissions-report?view=azure-devops)",
+        "Is [Git Credential Manager](https://learn.microsoft.com/azure/devops/repos/git/set-up-credential-managers?view=azure-devops) being used?",
+        "Were there any network or proxy settings blocking access to Azure DevOps?",
+        "Was the Git client properly configured for authentication?\n# Git Operations, Limits and Performance",
+        "Are there [errors related to limits](https://learn.microsoft.com/azure/devops/repos/git/limits?view=azure-devops)?",
+        "Were there any errors during Git clone, push, or pull operations?",
+        "Was the [Git client version up-to-date](https://git-scm.com/downloads)?",
+        "Were there any issues with [Git commands](https://learn.microsoft.com/azure/devops/repos/git/command-prompt?view=azure-devops) like `git log`, `git rebase`, or `git checkout`?",
+        "Was the [repository structure](https://learn.microsoft.com/training/modules/configure-project-repository-structure-support-secure-pipelines/2-organize-project-repository-structure) correctly configured for submodules?",
+        "Were there any performance issues related to network latency or throttling?",
+        "Check the [repository health](https://learn.microsoft.com/azure/devops/repos/git/repo-health?view=azure-devops)\n# Integration and Migration Issues",
+        "Was the integration between [Azure DevOps and GitHub configured](https://learn.microsoft.com/azure/devops/cross-service/github-integration?toc=%2Fazure%2Fdevops%2Frepos%2Ftoc.json&view=azure-devops) correctly?",
+        "Were there any issues migrating repositories from [SVN](https://learn.microsoft.com/azure/devops/repos/git/perform-migration-from-svn-to-git?view=azure-devops), [TFVC](https://learn.microsoft.com/azure/devops/repos/git/import-from-tfvc?view=azure-devops), GitLab, or other platforms?\n# Pipeline and Build Configuration",
+        "Are [multiple repositories](https://learn.microsoft.com/azure/devops/pipelines/repos/multi-repo-checkout?view=azure-devops) being checked out?",
+        "Were the pipeline configurations correctly set up for [Azure repository access](https://learn.microsoft.com/azure/devops/pipelines/security/secure-access-to-repos?view=azure-devops&tabs=yaml)?",
+        "Were there any issues with YAML pipelines accessing repositories in other projects?",
+        "Were the [pipeline permissions](https://learn.microsoft.com/azure/devops/pipelines/policies/permissions?view=azure-devops#pipeline-permissions) properly configured?",
+        "Were there any errors related to build failures or [repository size limits](https://learn.microsoft.com/azure/devops/repos/git/limits?view=azure-devops)?",
+        "Was the pipeline using the correct Git version or dependencies?\n# Encoding and File Management",
+        "Were the file encoding settings properly configured in the repository?",
+        "Were there any issues with SJIS-encoded files causing garbled text?",
+        "Were there any blocked files due to user actions or permissions?",
+        "Were the files properly tracked and managed using Git LFS?",
+        "Were there any issues with file locking or branch policies?"
+      ]
+    }
+  ],
+  "totalRequiredFields": 26
+}

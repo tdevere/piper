@@ -281,9 +281,250 @@ YOUR ANSWER:`;
 
 yargs(hideBin(process.argv))
   .scriptName("piper")
+  .command('oneshot <input> [description]', 'Quick one-shot analysis without full workflow', {
+      previous: {
+          type: 'string',
+          description: 'Path to previous oneshot report for context',
+          alias: 'p'
+      },
+      output: {
+          type: 'string',
+          description: 'Output file for report (default: oneshot-report.md)',
+          alias: 'o',
+          default: 'oneshot-report.md'
+      }
+  }, async (argv: any) => {
+      try {
+          console.log(chalk.bold.cyan('\n⚡ ONE-SHOT ANALYSIS\n'));
+          
+          const inputPath = path.resolve(argv.input);
+          const outputPath = path.resolve(argv.output);
+          const description = argv.description || '';
+          
+          // Check input exists
+          if (!await fs.pathExists(inputPath)) {
+              console.error(chalk.red(`Input not found: ${inputPath}`));
+              process.exit(1);
+          }
+          
+          // Create temporary case ID for analysis
+          const tempCaseId = `oneshot-${Date.now()}`;
+          console.log(chalk.gray(`Creating temporary analysis: ${tempCaseId}`));
+          
+          // Create new case manually
+          const newCase: Case = {
+              id: tempCaseId,
+              principlesVersion: '1.0',
+              title: description || `One-shot analysis of ${path.basename(inputPath)}`,
+              context: description,
+              formal: {
+                  expected: 'System functioning normally',
+                  actual: description || 'Issue detected'
+              },
+              evidence: [],
+              questions: [],
+              hypotheses: [],
+              unknowns: [],
+              events: [],
+              state: 'Intake' as CaseState
+          };
+          
+          // Ingest the input (handle file, folder, or zip)
+          console.log(chalk.blue(`\n📥 Processing input: ${path.basename(inputPath)}`));
+          const stat = await fs.stat(inputPath);
+          
+          if (stat.isDirectory()) {
+              // Add all files in directory
+              const files = await fs.readdir(inputPath);
+              for (const file of files) {
+                  const filePath = path.join(inputPath, file);
+                  const fileStat = await fs.stat(filePath);
+                  if (fileStat.isFile()) {
+                      const { evidence: ev } = await evidenceMgr.addFile(tempCaseId, filePath, ['oneshot', 'auto-ingested']);
+                      newCase.evidence.push(ev);
+                  }
+              }
+          } else if (inputPath.endsWith('.zip')) {
+              // Extract and add zip contents - let evidenceMgr handle extraction
+              const { evidence: ev } = await evidenceMgr.addFile(tempCaseId, inputPath, ['oneshot', 'archive']);
+              newCase.evidence.push(ev);
+          } else {
+              // Single file
+              const { evidence: ev } = await evidenceMgr.addFile(tempCaseId, inputPath, ['oneshot', 'primary']);
+              newCase.evidence.push(ev);
+          }
+          
+          await store.save(newCase);
+          console.log(chalk.green(`✓ Ingested ${newCase.evidence.length} file(s)`));
+          
+          // Load previous context if provided
+          let previousContext = '';
+          if (argv.previous) {
+              const prevPath = path.resolve(argv.previous);
+              if (await fs.pathExists(prevPath)) {
+                  previousContext = await fs.readFile(prevPath, 'utf-8');
+                  console.log(chalk.gray(`\n📋 Loaded previous report for context (${Math.round(previousContext.length / 1024)}KB)`));
+              } else {
+                  console.log(chalk.yellow(`⚠️  Previous report not found: ${prevPath}`));
+              }
+          }
+          
+          // Generate one-shot analysis using orchestrator
+          console.log(chalk.blue(`\n🤖 Generating one-shot analysis...\n`));
+          
+          // Use orchestrator to generate scope
+          const problemScope = await orchestrator.generateProblemScope(tempCaseId);
+          
+          // Reload case to get any updates from scope generation
+          const updatedCase = await store.load(tempCaseId);
+          
+          // Generate markdown report
+          const report = `# One-Shot Analysis Report
+**Generated:** ${new Date().toISOString()}
+**Input:** ${path.basename(inputPath)}
+**Description:** ${description || 'N/A'}
+${previousContext ? `**Follow-up to:** ${argv.previous}\n` : ''}
+
+---
+
+## Problem Summary
+
+${problemScope.summary}
+
+### Error Patterns Identified
+${problemScope.errorPatterns.length > 0 ? problemScope.errorPatterns.map(p => `- ❌ ${p}`).join('\n') : '- No specific error patterns detected'}
+
+### Affected Components
+${problemScope.affectedComponents.length > 0 ? problemScope.affectedComponents.map(c => `- 🔧 ${c}`).join('\n') : '- Components not yet identified'}
+
+### Impact
+${problemScope.impact}
+
+${problemScope.timeframe ? `### Timeframe\n${problemScope.timeframe}\n` : ''}
+
+---
+
+## Classification & Hypotheses
+
+${updatedCase.classification ? `**Issue Type:** ${updatedCase.classification}\n` : ''}
+
+### Initial Hypotheses
+${updatedCase.hypotheses && updatedCase.hypotheses.length > 0 ? 
+  updatedCase.hypotheses.map((h: any, i: number) => `${i + 1}. **${h.description}**`).join('\n') : 
+  'No hypotheses generated yet'}
+
+---
+
+## Evidence Analysis
+
+${newCase.evidence.map((ev, i) => `### ${i + 1}. ${ev.path}
+- **Tags:** ${ev.tags.join(', ')}
+- **Type:** ${ev.mediaType}
+- **Size:** ${Math.round(ev.sizeBytes / 1024)}KB
+`).join('\n')}
+
+**Evidence Summary:** ${problemScope.evidenceSummary}
+
+${previousContext ? `---\n\n## Previous Analysis Context\n\n${previousContext.substring(0, 1000)}...\n\n*This is a follow-up analysis. Review both reports together.*\n` : ''}
+
+---
+
+## Next Steps
+
+1. **Review Problem Scope** - Validate the problem summary and error patterns identified above
+2. **Test Hypotheses** - Investigate the root causes in order of likelihood
+3. **Gather More Evidence** - If inconclusive, collect additional diagnostic data:
+   - Logs from affected timeframe
+   - Configuration files
+   - Environment details
+4. **Use Full Workflow** - For interactive troubleshooting: \`piper ingest ${path.basename(inputPath)}\`
+
+---
+
+## Analysis Metadata
+- **Case ID:** ${tempCaseId}
+- **Evidence Count:** ${newCase.evidence.length} files
+- **Analysis Timestamp:** ${new Date().toISOString()}
+- **Previous Context:** ${previousContext ? 'Yes' : 'No'}
+- **PII Redaction:** Automatic (all sensitive data removed)
+
+---
+
+*Generated by PipelineExpert One-Shot Analysis*
+*For full multi-agent workflow with interactive questions: \`piper ingest\` command*
+`;
+
+          // Save report
+          await fs.writeFile(outputPath, report, 'utf-8');
+          
+          console.log(chalk.green(`\n✅ One-shot analysis complete!`));
+          console.log(chalk.white(`📄 Report saved to: ${outputPath}`));
+          console.log(chalk.gray(`\n💡 Tips:`));
+          console.log(chalk.gray(`   • Review the report for classification and hypotheses`));
+          console.log(chalk.gray(`   • For deeper investigation, use full workflow: piper ingest ${argv.input}`));
+          console.log(chalk.gray(`   • For follow-up analysis: piper oneshot <new-evidence> --previous ${outputPath}\n`));
+          
+          // Clean up temporary case directory
+          console.log(chalk.gray(`Cleaning up temporary case...`));
+          const caseDir = path.join(rootDir, tempCaseId);
+          if (await fs.pathExists(caseDir)) {
+              await fs.remove(caseDir);
+          }
+          
+      } catch (err: any) {
+          console.error(chalk.red(`One-shot analysis failed: ${err.message}`));
+          if (process.env.DEBUG) {
+              console.error(err.stack);
+          }
+          process.exit(1);
+      }
+  })
   .command('scope <id>', 'Define and confirm problem scope before diagnostic questions', {}, async (argv: any) => {
       try {
           const c = await store.load(argv.id);
+          
+          // First, check for scoping template and show checklist if available
+          if (!c.scopeConfirmed) {
+              console.log(chalk.blue(`\n📋 Checking for scoping template...\n`));
+              
+              const scopingTemplate = await templateMgr.matchScoping(c.title, c.context);
+              
+              if (scopingTemplate) {
+                  console.log(chalk.bold.cyan(`📋 ${scopingTemplate.title.toUpperCase()}`));
+                  console.log(chalk.gray(`   ${scopingTemplate.description}\n`));
+                  
+                  // Display scoping checklist
+                  for (const category of scopingTemplate.scopingCategories) {
+                      console.log(chalk.bold.yellow(`\n■ ${category.category}:`));
+                      category.requiredFields.forEach(field => {
+                          // Clean up formatting (remove newlines, keep structure)
+                          const cleanField = field.replace(/\n/g, ' ').trim();
+                          console.log(chalk.white(`   • ${cleanField}`));
+                      });
+                  }
+                  
+                  console.log(chalk.bold.cyan(`\n📊 SCOPING REQUIREMENTS:`));
+                  console.log(chalk.gray(`   Total fields to collect: ${scopingTemplate.totalRequiredFields || 'Unknown'}`));
+                  console.log(chalk.gray(`   Evidence collected so far: ${c.evidence.length} files`));
+                  
+                  if (scopingTemplate.externalReferences && scopingTemplate.externalReferences.length > 0) {
+                      console.log(chalk.bold.cyan(`\n🔗 REFERENCE DOCUMENTATION:`));
+                      scopingTemplate.externalReferences.slice(0, 3).forEach(ref => {
+                          console.log(chalk.gray(`   • ${ref.title}`));
+                          console.log(chalk.gray(`     ${ref.url}`));
+                      });
+                  }
+                  
+                  console.log(chalk.bold.yellow(`\n💡 NEXT STEPS:`));
+                  console.log(chalk.white(`   1. Gather the information listed above`));
+                  console.log(chalk.white(`   2. Add evidence files: piper add-evidence ${argv.id} <file>`));
+                  console.log(chalk.white(`   3. Re-run scope command to analyze collected evidence`));
+                  console.log(chalk.white(`   4. Confirm scope to proceed to troubleshooting\n`));
+              } else {
+                  console.log(chalk.yellow('   ⚠️  No specific scoping template found - using general workflow\n'));
+              }
+          }
+          
           console.log(chalk.blue(`\n🔍 Analyzing evidence to define problem scope...\n`));
           
           // Generate problem scope using AI
@@ -400,9 +641,61 @@ yargs(hideBin(process.argv))
               let templateToApply: any = null;
               
               if (matchedTemplates.length > 0) {
-                  templateToApply = matchedTemplates[0];
-                  console.log(chalk.green(`   ✓ Found matching template: "${templateToApply.name}"`));
-                  console.log(chalk.gray(`     Classification: ${templateToApply.classification || 'General'}`));
+                  // Show top matches for user selection
+                  console.log(chalk.yellow(`\n   📚 Found ${matchedTemplates.length} matching template(s):\n`));
+                  const topMatches = matchedTemplates.slice(0, 3);
+                  topMatches.forEach((t: any, idx: number) => {
+                      console.log(chalk.cyan(`   ${idx + 1}. ${t.name}`));
+                      console.log(chalk.gray(`      Classification: ${t.classification || 'General'}`));
+                      console.log(chalk.gray(`      Questions: ${t.questions?.length || 0} | Hypotheses: ${t.initialHypotheses?.length || 0}\n`));
+                  });
+                  
+                  // Prompt user for selection
+                  const readline = require('readline').createInterface({
+                      input: process.stdin,
+                      output: process.stdout
+                  });
+                  
+                  const selection = await new Promise<string>(resolve => {
+                      readline.question(
+                          chalk.yellow(`   Select template [1-${topMatches.length}], 0 to skip, or 'c' for custom: `),
+                          (ans: string) => resolve(ans.trim())
+                      );
+                  });
+                  
+                  readline.close();
+                  
+                  if (selection === '0') {
+                      console.log(chalk.yellow('   Template selection skipped - proceeding with manual workflow\n'));
+                      // Track rejection
+                      c.metadata = c.metadata || {};
+                      c.metadata.rejectedTemplates = c.metadata.rejectedTemplates || [];
+                      topMatches.forEach((t: any) => {
+                          c.metadata!.rejectedTemplates!.push({
+                              templateId: t.id,
+                              templateName: t.name,
+                              timestamp: new Date().toISOString(),
+                              reason: 'User skipped template selection after scope confirmation'
+                          });
+                      });
+                      await store.save(c);
+                      await store.appendEvent(argv.id, 'TemplatesRejected', 
+                          `User declined ${topMatches.length} matched template(s)`);
+                  } else if (selection.toLowerCase() === 'c') {
+                      console.log(chalk.cyan('\n   🛠️  Custom template generation not yet implemented'));
+                      console.log(chalk.gray('     Proceeding with manual workflow\n'));
+                      // TODO: Implement custom template generation
+                  } else {
+                      const idx = parseInt(selection) - 1;
+                      if (idx >= 0 && idx < topMatches.length) {
+                          templateToApply = topMatches[idx];
+                          console.log(chalk.green(`\n   ✓ Selected template: "${templateToApply.name}"\n`));
+                          await store.appendEvent(argv.id, 'TemplateSelected', 
+                              `User selected template: ${templateToApply.name} (option ${selection})`);
+                      } else {
+                          console.log(chalk.yellow('   Invalid selection - proceeding with manual workflow\n'));
+                      }
+                  }
               } else {
                   // Load generic template as fallback
                   console.log(chalk.yellow('   ⚠️  No specialized template found'));
@@ -494,6 +787,8 @@ yargs(hideBin(process.argv))
               
               if (refined.trim()) {
                   const newVersion = (c.problemScope?.version || 0) + 1;
+                  const oldSummary = c.problemScope?.summary || problemScope.summary;
+                  
                   c.problemScope = {
                       ...problemScope,
                       summary: refined.trim(),
@@ -502,6 +797,18 @@ yargs(hideBin(process.argv))
                   };
                   c.formal.actual = refined.trim(); // Update case title too
                   c.scopeConfirmed = true;
+                  
+                  // Track refinement in metadata
+                  c.metadata = c.metadata || {};
+                  c.metadata.scopeRefinements = c.metadata.scopeRefinements || [];
+                  c.metadata.scopeRefinements.push({
+                      version: newVersion,
+                      oldSummary: oldSummary,
+                      newSummary: refined.trim(),
+                      timestamp: new Date().toISOString(),
+                      userInitiated: true
+                  });
+                  
                   await store.save(c);
                   await store.appendEvent(argv.id, 'ScopeRefined', `User refined problem scope to v${newVersion}`);
                   
@@ -1351,6 +1658,15 @@ yargs(hideBin(process.argv))
           type: 'string',
           description: 'Context/domain for analysis (pipelines, azure, kubernetes, terraform, docker)',
           default: 'general'
+      },
+      problemStatement: {
+          type: 'string',
+          description: 'Detailed problem statement with error messages and behavior (bypasses interactive prompt)',
+      },
+      autoApproveTemplate: {
+          type: 'boolean',
+          description: 'Automatically apply matched template without confirmation',
+          default: false
       }
   }, async (argv: any) => {
       const id = uuidv4().substring(0, 8);
@@ -1358,6 +1674,36 @@ yargs(hideBin(process.argv))
       try {
           console.log(chalk.blue(`🚀 Starting case ingestion: ${argv.problem}`));
           console.log(chalk.gray(`Case ID: ${id}`));
+          
+          // Step 0.5: Collect detailed problem statement (if not provided via flag)
+          let detailedProblemStatement = argv.problemStatement;
+          if (!detailedProblemStatement && !argv.autoAnalyze) {
+              console.log(chalk.bold.yellow('\n💬 Help us understand the problem better:'));
+              console.log(chalk.gray('   This will help match the right template and focus our analysis.\n'));
+              
+              const readline = require('readline').createInterface({
+                  input: process.stdin,
+                  output: process.stdout
+              });
+              
+              const askQuestion = (prompt: string): Promise<string> => {
+                  return new Promise(resolve => {
+                      readline.question(chalk.yellow(prompt), (ans: string) => resolve(ans));
+                  });
+              };
+              
+              const errorMsg = await askQuestion('   📍 What specific error message or code did you see? (if any): ');
+              const behavior = await askQuestion('   🔍 What behavior did you observe? (what failed/broke): ');
+              const expected = await askQuestion('   ✓ What should have happened instead?: ');
+              
+              readline.close();
+              
+              detailedProblemStatement = `Problem: ${argv.problem}\n\nError/Code: ${errorMsg || 'None specified'}\nObserved Behavior: ${behavior || 'Not specified'}\nExpected Behavior: ${expected || 'Normal operation'}`;
+              
+              console.log(chalk.green('\n✓ Problem statement captured\n'));
+          } else if (!detailedProblemStatement) {
+              detailedProblemStatement = argv.problem;
+          }
           
           // Step 1: Extract zip to staging
           console.log(chalk.gray('📦 Extracting zip to staging area...'));
@@ -1369,16 +1715,49 @@ yargs(hideBin(process.argv))
           
           // Step 2: Template Matching
           let template = null;
+          let matchedTemplates: any[] = []; // Store for rejection tracking
           if (argv.template) {
               template = await templateMgr.load(argv.template);
               console.log(chalk.green(`✓ Using template: ${template.name}`));
           } else {
               console.log(chalk.gray('🔍 Searching for matching template...'));
-              const matches = await templateMgr.match(argv.problem);
-              if (matches.length > 0) {
-                  template = matches[0];
-                  console.log(chalk.yellow(`📋 Found template: ${template.name} (v${template.version})`));
-                  await templateMgr.incrementUsage(template.id);
+              const searchText = detailedProblemStatement || argv.problem;
+              matchedTemplates = await templateMgr.match(searchText);
+              if (matchedTemplates.length > 0) {
+                  const topMatch = matchedTemplates[0];
+                  console.log(chalk.yellow(`📋 Found template: ${topMatch.name} (v${topMatch.version})`));
+                  console.log(chalk.gray(`   Classification: ${topMatch.classification || 'General'}`));
+                  console.log(chalk.gray(`   Questions: ${topMatch.questions?.length || 0}`));
+                  console.log(chalk.gray(`   Hypotheses: ${topMatch.initialHypotheses?.length || 0}`));
+                  
+                  // Confirm template application
+                  if (!argv.autoApproveTemplate && !argv.autoAnalyze) {
+                      const readline = require('readline').createInterface({
+                          input: process.stdin,
+                          output: process.stdout
+                      });
+                      
+                      const confirm = await new Promise<string>(resolve => {
+                          readline.question(
+                              chalk.yellow('\n   Apply this template? [Y/n]: '),
+                              (ans: string) => resolve(ans)
+                          );
+                      });
+                      
+                      readline.close();
+                      
+                      if (confirm.toLowerCase() === 'n') {
+                          console.log(chalk.yellow('   Template declined - proceeding with manual workflow\n'));
+                          template = null;
+                          // Track rejection (will be added to case after creation)
+                      } else {
+                          template = topMatch;
+                          await templateMgr.incrementUsage(template.id);
+                      }
+                  } else {
+                      template = topMatch;
+                      await templateMgr.incrementUsage(template.id);
+                  }
               } else {
                   console.log(chalk.yellow('⚠ No matching template found. Using generic workflow.'));
               }
@@ -1394,12 +1773,12 @@ yargs(hideBin(process.argv))
                   expected: "System should operate without errors", 
                   actual: argv.problem 
               },
-              hypotheses: template?.initialHypotheses?.map(h => ({
+              hypotheses: template?.initialHypotheses?.map((h: any) => ({
                   ...h,
                   status: 'Open' as const,
                   evidenceRefs: []
               })) || [],
-              questions: template?.questions?.map(q => ({
+              questions: template?.questions?.map((q: any) => ({
                   ...q,
                   status: 'Open' as const
               })) || [],
@@ -1410,8 +1789,22 @@ yargs(hideBin(process.argv))
               strictMode: true,
               constraints: [],
               templateId: template?.id,
-              classification: template?.classification
+              classification: template?.classification,
+              metadata: {
+                  detailedProblemStatement: detailedProblemStatement
+              }
           };
+          
+          // Track template rejection if user declined
+          if (!template && matchedTemplates && matchedTemplates.length > 0) {
+              newCase.metadata = newCase.metadata || {};
+              newCase.metadata.rejectedTemplates = [{
+                  templateId: matchedTemplates[0].id,
+                  templateName: matchedTemplates[0].name,
+                  timestamp: new Date().toISOString(),
+                  reason: 'User declined during ingestion'
+              }];
+          }
           
           await store.save(newCase);
           await store.appendEvent(id, 'CaseCreated', `Ingested from problem: ${argv.problem}`);
@@ -1537,12 +1930,185 @@ yargs(hideBin(process.argv))
                       return;
                   }
                   
+                  // Display confirmed scope statement clearly
+                  console.log(chalk.green.bold('\n✅ PROBLEM SCOPE CONFIRMED\n'));
+                  console.log(chalk.bold.cyan('📋 Confirmed Scope Statement:'));
+                  console.log(chalk.white(`   "${problemScope.summary}"\n`));
+                  
+                  // Offer to refine the statement
+                  const refinePrompt = require('readline').createInterface({
+                      input: process.stdin,
+                      output: process.stdout
+                  });
+                  
+                  const refineChoice = await new Promise<string>(resolve => {
+                      refinePrompt.question(
+                          chalk.yellow('   Would you like to:\n   1) Keep this statement\n   2) Edit the statement manually\n   3) Regenerate with AI using your feedback\n   \n   Select option [1-3, default=1]: '),
+                          (ans: string) => resolve(ans)
+                      );
+                  });
+                  
+                  refinePrompt.close();
+                  
+                  const refineOption = refineChoice.trim() === '' ? 1 : parseInt(refineChoice.trim());
+                  
+                  if (refineOption === 2) {
+                      // Manual edit
+                      const editReadline = require('readline').createInterface({
+                          input: process.stdin,
+                          output: process.stdout
+                      });
+                      
+                      const editedStatement = await new Promise<string>(resolve => {
+                          editReadline.question(chalk.gray('\n   Enter updated statement: '), (ans: string) => resolve(ans));
+                      });
+                      
+                      editReadline.close();
+                      
+                      if (editedStatement.trim()) {
+                          problemScope.summary = editedStatement.trim();
+                          caseData.formal.actual = editedStatement.trim();
+                          console.log(chalk.green('\n   ✓ Statement updated'));
+                      }
+                  } else if (refineOption === 3) {
+                      // Regenerate with AI feedback
+                      const feedbackReadline = require('readline').createInterface({
+                          input: process.stdin,
+                          output: process.stdout
+                      });
+                      
+                      const feedback = await new Promise<string>(resolve => {
+                          feedbackReadline.question(chalk.gray('\n   What should be different? (your feedback): '), (ans: string) => resolve(ans));
+                      });
+                      
+                      feedbackReadline.close();
+                      
+                      if (feedback.trim()) {
+                          console.log(chalk.cyan('\n   🤖 Regenerating scope statement with your feedback...\n'));
+                          
+                          try {
+                              const regeneratedScope = await orchestrator.generateProblemScope(id, feedback.trim());
+                              problemScope.summary = regeneratedScope.summary;
+                              problemScope.errorPatterns = regeneratedScope.errorPatterns;
+                              problemScope.affectedComponents = regeneratedScope.affectedComponents;
+                              problemScope.timeframe = regeneratedScope.timeframe;
+                              problemScope.impact = regeneratedScope.impact;
+                              problemScope.evidenceSummary = regeneratedScope.evidenceSummary;
+                              caseData.formal.actual = regeneratedScope.summary;
+                              
+                              console.log(chalk.green('   ✓ Regenerated scope statement:'));
+                              console.log(chalk.white(`   "${regeneratedScope.summary}"\n`));
+                          } catch (err: any) {
+                              console.log(chalk.yellow(`   ⚠️  Regeneration failed: ${err.message}`));
+                              console.log(chalk.gray('   Keeping original statement'));
+                          }
+                      }
+                  }
+                  
                   // Save confirmed scope
                   caseData.problemScope = problemScope;
                   caseData.scopeConfirmed = true;
                   await store.save(caseData);
                   await store.appendEvent(id, 'ScopeConfirmed', 'User confirmed problem scope');
-                  console.log(chalk.green('\n✅ Problem scope confirmed'));
+                  
+                  // Step 2.5: Match and apply troubleshooting template
+                  console.log(chalk.cyan('\n🔍 Searching for specialized troubleshooting templates...\n'));
+                  const templateManager = new (require('./templates/TemplateManager').TemplateManager)(
+                      require('path').join(process.cwd(), 'templates')
+                  );
+                  
+                  const matchedTemplates = await templateManager.match(
+                      problemScope.summary,
+                      problemScope.errorPatterns.join(' ')
+                  );
+                  
+                  let templateApplied = false;
+                  const scopeWasRegenerated = (refineOption === 3);
+                  
+                  // Re-match templates if scope was regenerated, or if no template applied yet
+                  if (matchedTemplates.length > 0 && (caseData.questions.length === 0 || scopeWasRegenerated)) {
+                      // Show top matches
+                      console.log(chalk.yellow(`   📚 Found ${matchedTemplates.length} matching template(s):\n`));
+                      const topMatches = matchedTemplates.slice(0, 3);
+                      topMatches.forEach((t: any, idx: number) => {
+                          console.log(chalk.cyan(`   ${idx + 1}. ${t.name}`));
+                          console.log(chalk.gray(`      Classification: ${t.classification || 'General'}`));
+                          console.log(chalk.gray(`      Questions: ${t.questions?.length || 0} | Hypotheses: ${t.initialHypotheses?.length || 0}\n`));
+                      });
+                      
+                      if (scopeWasRegenerated && caseData.questions.length > 0) {
+                          console.log(chalk.yellow(`   ⚠️  Scope was regenerated - current template: ${caseData.templateId || 'unknown'}\n`));
+                      }
+                      
+                      // Auto-apply best match or prompt for selection
+                      const templateReadline = require('readline').createInterface({
+                          input: process.stdin,
+                          output: process.stdout
+                      });
+                      
+                      const promptText = scopeWasRegenerated 
+                          ? chalk.yellow(`   Select template [1-${topMatches.length}], 0 to keep current, or Enter to replace with best match: `)
+                          : chalk.yellow(`   Select template [1-${topMatches.length}], 0 to skip, or Enter for best match: `);
+                      
+                      const templateSelection = await new Promise<string>(resolve => {
+                          templateReadline.question(promptText, (ans: string) => resolve(ans.trim()));
+                      });
+                      
+                      templateReadline.close();
+                      
+                      let selectedTemplate: any = null;
+                      
+                      if (templateSelection === '0') {
+                          if (scopeWasRegenerated) {
+                              console.log(chalk.yellow('\n   Keeping existing template\n'));
+                              templateApplied = true;
+                          } else {
+                              console.log(chalk.yellow('\n   Template skipped - proceeding with manual workflow\n'));
+                          }
+                      } else if (templateSelection === '' || templateSelection === '1') {
+                          selectedTemplate = topMatches[0];
+                      } else {
+                          const idx = parseInt(templateSelection) - 1;
+                          if (idx >= 0 && idx < topMatches.length) {
+                              selectedTemplate = topMatches[idx];
+                          }
+                      }
+                      
+                      if (selectedTemplate) {
+                          const isReplacement = caseData.questions.length > 0;
+                          
+                          caseData.questions = selectedTemplate.questions.map((q: any) => ({
+                              ...q,
+                              status: 'Open' as const
+                          }));
+                          caseData.hypotheses = selectedTemplate.initialHypotheses?.map((h: any) => ({
+                              ...h,
+                              status: 'Open' as const,
+                              evidenceRefs: []
+                          })) || [];
+                          caseData.templateId = selectedTemplate.id;
+                          caseData.classification = selectedTemplate.classification;
+                          await store.save(caseData);
+                          
+                          const eventMsg = isReplacement 
+                              ? `Replaced template with: ${selectedTemplate.name}`
+                              : `Applied template: ${selectedTemplate.name}`;
+                          await store.appendEvent(id, 'TemplateApplied', eventMsg);
+                          
+                          console.log(chalk.green(`\n   ✓ Applied template: "${selectedTemplate.name}"`));
+                          console.log(chalk.gray(`   Diagnostic questions: ${selectedTemplate.questions.length}`));
+                          console.log(chalk.gray(`   Hypotheses: ${selectedTemplate.initialHypotheses?.length || 0}\n`));
+                          templateApplied = true;
+                      }
+                  } else if (caseData.questions.length > 0 && !scopeWasRegenerated) {
+                      console.log(chalk.gray('   ✓ Template was applied during ingestion\n'));
+                      templateApplied = true;
+                  } else {
+                      console.log(chalk.yellow('   ⚠️  No matching templates found - proceeding with manual workflow\n'));
+                  }
+                  
+                  // Reload case to get latest questions after potential template replacement
+                  caseData = await store.load(id);
                   
                   // Step 3: Now try to auto-extract answers from evidence using AI
                   let openQuestions = caseData.questions.filter(q => q.status === 'Open');
@@ -1568,16 +2134,64 @@ yargs(hideBin(process.argv))
                                   
                                   console.log(confidenceColor(`📋 Q: ${q.ask}`));
                                   console.log(confidenceColor(`   [${q.id}] ${extraction.confidence.toUpperCase()} confidence`));
-                                  console.log(chalk.white(`   Answer: ${extraction.extractedAnswer}`));
+                                  console.log(chalk.white(`   Suggested Answer: ${extraction.extractedAnswer}`));
                                   console.log(chalk.gray(`   Found in: ${extraction.evidenceRefs.length} file(s)`));
                                   
                                   // Auto-apply high confidence, ask for others in analyze step
                                   if (extraction.confidence === 'high') {
-                                      toApply.push({
-                                          questionId: extraction.questionId,
-                                          suggestedAnswer: `[From Evidence] ${extraction.extractedAnswer}`
+                                      // Ask for user confirmation
+                                      const confirmReadline = require('readline').createInterface({
+                                          input: process.stdin,
+                                          output: process.stdout
                                       });
-                                      console.log(chalk.green('   ✅ Auto-applied (high confidence)\n'));
+                                      
+                                      const confirm = await new Promise<string>(resolve => {
+                                          confirmReadline.question(
+                                              chalk.yellow('   Accept this answer? [Y]es/[N]o/[E]dit/[U]ncertain (default=Y): '),
+                                              (ans: string) => resolve(ans)
+                                          );
+                                      });
+                                      
+                                      confirmReadline.close();
+                                      
+                                      const choice = confirm.trim().toLowerCase() || 'y';
+                                      
+                                      if (choice === 'y' || choice === 'yes') {
+                                          toApply.push({
+                                              questionId: extraction.questionId,
+                                              suggestedAnswer: `[From Evidence] ${extraction.extractedAnswer}`
+                                          });
+                                          console.log(chalk.green('   ✅ Answer accepted\n'));
+                                      } else if (choice === 'e' || choice === 'edit') {
+                                          const editReadline = require('readline').createInterface({
+                                              input: process.stdin,
+                                              output: process.stdout
+                                          });
+                                          
+                                          const editedAnswer = await new Promise<string>(resolve => {
+                                              editReadline.question(chalk.gray('   Enter your answer: '), (ans: string) => resolve(ans));
+                                          });
+                                          
+                                          editReadline.close();
+                                          
+                                          if (editedAnswer.trim()) {
+                                              toApply.push({
+                                                  questionId: extraction.questionId,
+                                                  suggestedAnswer: editedAnswer.trim()
+                                              });
+                                              console.log(chalk.green('   ✅ Custom answer saved\n'));
+                                          } else {
+                                              console.log(chalk.gray('   ⊙ Skipped - will be answered in analyze step\n'));
+                                          }
+                                      } else if (choice === 'u' || choice === 'uncertain') {
+                                          toApply.push({
+                                              questionId: extraction.questionId,
+                                              suggestedAnswer: `[Uncertain] ${extraction.extractedAnswer}`
+                                          });
+                                          console.log(chalk.yellow('   ⚠️  Marked as uncertain - may need review\n'));
+                                      } else {
+                                          console.log(chalk.gray('   ⊙ Skipped - will be answered in analyze step\n'));
+                                      }
                                   } else {
                                       console.log(chalk.gray('   ⊙ Medium/low confidence - will be reviewed in analyze step\n'));
                                   }
@@ -1602,25 +2216,339 @@ yargs(hideBin(process.argv))
                       }
                   }
                   
-                  // Step 4: Check for remaining questions and provide next actions
+                  // Step 4: Check for remaining questions and continue with interactive analyze
                   const finalCase = await store.load(id);
                   const stillOpen = finalCase.questions.filter(q => q.status === 'Open');
                   const requiredOpen = stillOpen.filter(q => q.required);
                   
-                  if (requiredOpen.length > 0) {
-                      console.log(chalk.red.bold(`\n🚨 REQUIRED ACTIONS TO PROCEED:`));
-                      console.log(chalk.yellow(`   ${requiredOpen.length} REQUIRED questions must be answered:`));
-                      requiredOpen.forEach((q, i) => {
-                          console.log(chalk.yellow(`   ${i + 1}. ${q.ask}`));
-                      });
-                      console.log(chalk.cyan(`\n   Run: piper analyze ${id}`));
-                      console.log(chalk.gray(`   Or: piper answer ${id} <questionId> <answer>`));
-                  } else if (stillOpen.length > 0) {
-                      console.log(chalk.yellow(`\n⚠️  ${stillOpen.length} optional questions remain unanswered`));
-                      console.log(chalk.gray(`   Run: piper analyze ${id} to review`));
+                  if (requiredOpen.length > 0 || stillOpen.length > 0) {
+                      console.log(chalk.cyan.bold(`\n📋 INTERACTIVE QUESTION FLOW`));
+                      console.log(chalk.yellow(`   ${requiredOpen.length} required + ${stillOpen.length - requiredOpen.length} optional questions remaining\n`));
+                      
+                      // Show question list
+                      if (requiredOpen.length > 0) {
+                          console.log(chalk.bold('   Required Questions:'));
+                          requiredOpen.slice(0, 3).forEach((q, i) => {
+                              console.log(chalk.yellow(`   ${i + 1}. ${q.ask}`));
+                          });
+                          if (requiredOpen.length > 3) {
+                              console.log(chalk.gray(`   ... and ${requiredOpen.length - 3} more\n`));
+                          } else {
+                              console.log('');
+                          }
+                      }
+                      
+                      // Automatically launch interactive analyze flow
+                      console.log(chalk.cyan('   🚀 Starting interactive question answering...\n'));
+                      
+                      // Import and call the analyze logic directly
+                      const readline = require('readline');
+                      
+                      for (const question of stillOpen) {
+                          const isRequired = question.required;
+                          const prefix = isRequired ? chalk.red('[REQUIRED]') : chalk.gray('[OPTIONAL]');
+                          
+                          console.log(chalk.cyan(`\n${prefix} Q: ${question.ask}`));
+                          if (question.guidance) {
+                              console.log(chalk.gray(`   💡 ${question.guidance}`));
+                          }
+                          
+                          const rl = readline.createInterface({
+                              input: process.stdin,
+                              output: process.stdout
+                          });
+                          
+                          const answer = await new Promise<string>(resolve => {
+                              rl.question(chalk.yellow('   Your answer (or "skip" to skip, "quit" to exit): '), (ans: string) => {
+                                  resolve(ans);
+                              });
+                          });
+                          
+                          rl.close();
+                          
+                          const trimmed = answer.trim().toLowerCase();
+                          
+                          if (trimmed === 'quit' || trimmed === 'q' || trimmed === 'exit') {
+                              console.log(chalk.yellow('\n   Exiting interactive flow. Progress saved.\n'));
+                              console.log(chalk.gray(`   Resume with: piper analyze ${id}`));
+                              break;
+                          }
+                          
+                          if (trimmed === 'skip' || trimmed === 's') {
+                              if (isRequired) {
+                                  console.log(chalk.red('   ✗ Cannot skip required question'));
+                              } else {
+                                  console.log(chalk.gray('   ⊘ Skipped'));
+                              }
+                              continue;
+                          }
+                          
+                          if (answer.trim()) {
+                              // Apply the answer
+                              await orchestrator.applyAnswerSuggestions(id, [{
+                                  questionId: question.id,
+                                  suggestedAnswer: answer.trim()
+                              }]);
+                              console.log(chalk.green('   ✓ Answer saved'));
+                          }
+                      }
+                      
+                      // Check final status
+                      const completedCase = await store.load(id);
+                      const finalOpen = completedCase.questions.filter(q => q.status === 'Open');
+                      const finalRequired = finalOpen.filter(q => q.required);
+                      
+                      if (finalRequired.length === 0) {
+                          console.log(chalk.green.bold('\n✅ All required questions answered!\n'));
+                          
+                          // Automatically progress to next state to maintain momentum
+                          console.log(chalk.cyan('⚡ Auto-progressing to troubleshooting plan...\n'));
+                          
+                          try {
+                              const result = await orchestrator.next(id);
+                              const updatedCase = await store.load(id);
+                              
+                              if (result.autoProgressed) {
+                                  console.log(chalk.cyan(`⚡ Auto-progressed through analytical states to ${updatedCase.state}\n`));
+                              }
+                              
+                              // Show troubleshooting report/plan if generated
+                              if (result.report) {
+                                  console.log(result.report);
+                              }
+                              
+                              // Check what state we're in and continue engagement
+                              if (updatedCase.state === 'Plan') {
+                                  console.log(chalk.bold.cyan('\n🔍 TROUBLESHOOTING PLAN GENERATED\n'));
+                                  
+                                  // Show hypotheses that need validation
+                                  const openHypotheses = updatedCase.hypotheses.filter(h => h.status === 'Open');
+                                  if (openHypotheses.length > 0) {
+                                      console.log(chalk.yellow(`   ${openHypotheses.length} hypotheses to validate:\n`));
+                                      openHypotheses.slice(0, 3).forEach((h, i) => {
+                                          console.log(chalk.cyan(`   ${i + 1}. ${h.description}`));
+                                      });
+                                      if (openHypotheses.length > 3) {
+                                          console.log(chalk.gray(`   ... and ${openHypotheses.length - 3} more\n`));
+                                      }
+                                      
+                                      // Prompt to continue with hypothesis validation
+                                      const continueReadline = require('readline').createInterface({
+                                          input: process.stdin,
+                                          output: process.stdout
+                                      });
+                                      
+                                      const shouldContinue = await new Promise<string>(resolve => {
+                                          continueReadline.question(
+                                              chalk.yellow('\n   Continue with hypothesis validation? [Y/n]: '),
+                                              (ans: string) => resolve(ans)
+                                          );
+                                      });
+                                      
+                                      continueReadline.close();
+                                      
+                                      if (shouldContinue.trim().toLowerCase() !== 'n') {
+                                          console.log(chalk.cyan('\n🔬 Starting hypothesis validation...\n'));
+                                          
+                                          // Interactive hypothesis validation
+                                          for (const hypothesis of openHypotheses) {
+                                              console.log(chalk.bold.cyan(`\n📋 Hypothesis: ${hypothesis.description}`));
+                                              
+                                              const hypReadline = require('readline').createInterface({
+                                                  input: process.stdin,
+                                                  output: process.stdout
+                                              });
+                                              
+                                              const validation = await new Promise<string>(resolve => {
+                                                  hypReadline.question(
+                                                      chalk.yellow('   Status: [v]alidated, [d]isproven, [s]kip, or [q]uit: '),
+                                                      (ans: string) => resolve(ans)
+                                                  );
+                                              });
+                                              
+                                              hypReadline.close();
+                                              
+                                              const choice = validation.trim().toLowerCase();
+                                              
+                                              if (choice === 'q' || choice === 'quit') {
+                                                  console.log(chalk.yellow('\n   Exiting validation. Progress saved.\n'));
+                                                  console.log(chalk.gray(`   Resume with: piper next ${id}`));
+                                                  break;
+                                              } else if (choice === 'v' || choice === 'validated') {
+                                                  hypothesis.status = 'Validated';
+                                                  await store.save(updatedCase);
+                                                  console.log(chalk.green('   ✓ Hypothesis validated'));
+                                                  
+                                                  // Ask for evidence
+                                                  const evidenceReadline = require('readline').createInterface({
+                                                      input: process.stdin,
+                                                      output: process.stdout
+                                                  });
+                                                  
+                                                  const evidence = await new Promise<string>(resolve => {
+                                                      evidenceReadline.question(
+                                                          chalk.gray('   Provide evidence/notes (or press Enter to skip): '),
+                                                          (ans: string) => resolve(ans)
+                                                      );
+                                                  });
+                                                  
+                                                  evidenceReadline.close();
+                                                  
+                                                  if (evidence.trim()) {
+                                                      await store.appendEvent(id, 'HypothesisValidated', 
+                                                          `${hypothesis.description}: ${evidence.trim()}`);
+                                                      console.log(chalk.green('   ✓ Evidence recorded'));
+                                                  }
+                                              } else if (choice === 'd' || choice === 'disproven') {
+                                                  hypothesis.status = 'Disproven';
+                                                  await store.save(updatedCase);
+                                                  console.log(chalk.red('   ✗ Hypothesis disproven'));
+                                              } else if (choice === 's' || choice === 'skip') {
+                                                  console.log(chalk.gray('   ⊘ Skipped'));
+                                              }
+                                          }
+                                          
+                                          // Check if we can proceed to execution
+                                          const validatedCount = updatedCase.hypotheses.filter(h => h.status === 'Validated').length;
+                                          if (validatedCount > 0) {
+                                              console.log(chalk.green.bold(`\n✅ ${validatedCount} hypothesis(es) validated!\n`));
+                                              console.log(chalk.cyan('⚡ Auto-progressing to execution phase...\n'));
+                                              
+                                              await orchestrator.next(id);
+                                              const finalCase = await store.load(id);
+                                              
+                                              console.log(chalk.bold.cyan('\n🔧 READY FOR EXECUTION\n'));
+                                              console.log(chalk.white('   Based on validated hypotheses, apply the recommended fixes.\n'));
+                                              console.log(chalk.gray(`   Current state: ${finalCase.state}`));
+                                              console.log(chalk.gray(`   Run: piper next ${id} when fixes are applied\n`));
+                                          } else {
+                                              console.log(chalk.yellow('\n⚠️  No hypotheses validated yet\n'));
+                                              console.log(chalk.gray(`   Resume with: piper next ${id}`));
+                                          }
+                                      } else {
+                                          console.log(chalk.yellow('\n   Paused at Plan stage\n'));
+                                          console.log(chalk.gray(`   Resume with: piper next ${id}`));
+                                      }
+                                  } else {
+                                      console.log(chalk.gray(`\n   No hypotheses to validate. Run: piper next ${id}`));
+                                  }
+                              } else if (updatedCase.state === 'Execute') {
+                                  console.log(chalk.yellow(`\n🔧 Execution phase - apply recommended fixes\n`));
+                                  console.log(chalk.gray(`   Run: piper next ${id} after applying fixes`));
+                              } else if (updatedCase.state === 'Evaluate') {
+                                  console.log(chalk.yellow(`\n🔍 Evaluation phase - verify resolution\n`));
+                                  console.log(chalk.gray(`   Run: piper next ${id} to evaluate results`));
+                              }
+                          } catch (err: any) {
+                              console.log(chalk.red(`\n✗ Auto-progression failed: ${err.message}\n`));
+                              console.log(chalk.gray(`   Run: piper next ${id} manually`));
+                          }
+                      } else {
+                          console.log(chalk.yellow(`\n⚠️  ${finalRequired.length} required questions still unanswered\n`));
+                          console.log(chalk.gray(`   Resume with: piper analyze ${id}`));
+                      }
                   } else {
                       console.log(chalk.green.bold(`\n✅ All questions answered! Ready to proceed.`));
-                      console.log(chalk.cyan(`   Run: piper next ${id}`));
+                      
+                      // If using auto-analyze, automatically progress to next state
+                      if (argv.autoAnalyze) {
+                          console.log(chalk.cyan(`   🤖 Auto-progressing workflow...\n`));
+                          try {
+                              await orchestrator.next(id);
+                              const progressedCase = await store.load(id);
+                              console.log(chalk.green(`   ✓ Progressed to state: ${progressedCase.state}\n`));
+                              
+                              // Show what happened
+                              if (progressedCase.classification) {
+                                  console.log(chalk.bold.cyan('📊 CLASSIFICATION'));
+                                  console.log(chalk.white(`   ${progressedCase.classification}\n`));
+                              }
+                              
+                              if (progressedCase.hypotheses && progressedCase.hypotheses.length > 0) {
+                                  console.log(chalk.bold.cyan('\n💡 HYPOTHESES GENERATED'));
+                                  progressedCase.hypotheses
+                                      .filter(h => h.description) // Filter out undefined hypotheses
+                                      .forEach((h, i) => {
+                                          console.log(chalk.white(`   ${i + 1}. ${h.description}`));
+                                      });
+                                  console.log();
+                              }
+                              
+                              if (progressedCase.questions && progressedCase.questions.length > 0) {
+                                  const unanswered = progressedCase.questions.filter(q => !q.answer);
+                                  if (unanswered.length > 0) {
+                                      console.log(chalk.yellow(`\n⚠️  ${unanswered.length} new questions require answers`));
+                                      
+                                      // With -a flag, automatically continue to interactive question answering
+                                      console.log(chalk.cyan(`   🤖 Starting interactive question session...\n`));
+                                      
+                                      // Import readline for interactive prompts
+                                      const readline = require('readline');
+                                      
+                                      for (const question of unanswered) {
+                                          console.log(chalk.bold.cyan(`\n📋 ${question.ask}`));
+                                          console.log(chalk.gray(`   [${question.id}] ${question.required ? 'Required' : 'Optional'}`));
+                                          
+                                          const rl = readline.createInterface({
+                                              input: process.stdin,
+                                              output: process.stdout
+                                          });
+                                          
+                                          const answer = await new Promise<string>(resolve => {
+                                              rl.question(chalk.yellow('   Answer (or press Enter to skip): '), (ans: string) => resolve(ans));
+                                          });
+                                          
+                                          rl.close();
+                                          
+                                          if (answer.trim()) {
+                                              question.answer = answer.trim();
+                                              question.status = 'Answered';
+                                              console.log(chalk.green('   ✓ Answer recorded'));
+                                          } else {
+                                              console.log(chalk.gray('   ⊘ Skipped'));
+                                          }
+                                      }
+                                      
+                                      // Save answers
+                                      await store.save(progressedCase);
+                                      
+                                      // Check if all required questions are answered
+                                      const stillUnanswered = progressedCase.questions.filter(q => q.required && !q.answer);
+                                      if (stillUnanswered.length === 0) {
+                                          console.log(chalk.green.bold(`\n✅ All required questions answered!`));
+                                          console.log(chalk.cyan(`   Continuing workflow...\n`));
+                                          
+                                          // Progress to next state (this will generate the plan)
+                                          const result = await orchestrator.next(id);
+                                          const finalCase = await store.load(id);
+                                          console.log(chalk.green(`   ✓ Progressed to state: ${finalCase.state}\n`));
+                                          
+                                          // Display the generated plan if available
+                                          if (result.report) {
+                                              console.log(result.report);
+                                          }
+                                      } else {
+                                          console.log(chalk.yellow(`\n⚠️  ${stillUnanswered.length} required questions still unanswered`));
+                                          console.log(chalk.gray(`   Complete answers with: piper analyze ${id}\n`));
+                                      }
+                                  }
+                              }
+                              
+                              // Show next steps based on state
+                              if (progressedCase.state === 'Plan') {
+                                  console.log(chalk.bold.cyan('📋 NEXT STEPS'));
+                                  console.log(chalk.white('   Review hypotheses and continue: ') + chalk.cyan(`piper next ${id}`));
+                              } else if (progressedCase.state === 'Execute') {
+                                  console.log(chalk.bold.cyan('🔧 NEXT STEPS'));
+                                  console.log(chalk.white('   Apply recommended fixes, then: ') + chalk.cyan(`piper next ${id}`));
+                              }
+                          } catch (err: any) {
+                              console.log(chalk.red(`\n✗ Auto-progression failed: ${err.message}`));
+                              console.log(chalk.gray(`   Continue manually: piper next ${id}\n`));
+                          }
+                      } else {
+                          console.log(chalk.cyan(`   Run: piper next ${id}`));
+                      }
                   }
                   
               } catch (e: any) {
@@ -1868,6 +2796,7 @@ yargs(hideBin(process.argv))
               }
               
               console.log(chalk.bold.cyan('\n💡 NEXT STEPS'));
+              console.log(chalk.white('   • Generate solution document: ') + chalk.gray(`piper solution ${c.id}`));
               console.log(chalk.white('   • Review case details: ') + chalk.gray(`piper show ${c.id}`));
               console.log(chalk.white('   • View event timeline: ') + chalk.gray(`piper events ${c.id}`));
               console.log(chalk.white('   • Create new case: ') + chalk.gray(`piper ingest "<description>" <log-file>`));
@@ -1878,6 +2807,194 @@ yargs(hideBin(process.argv))
           
       } catch (err: any) {
           console.error(chalk.red(`Failed to resolve case: ${err.message}`));
+          if (process.env.DEBUG) {
+              console.error(err.stack);
+          }
+      }
+  })
+  .command('solution <id>', 'Generate comprehensive solution document for knowledge base', {
+      format: {
+          type: 'string',
+          choices: ['markdown', 'json', 'github'],
+          default: 'markdown',
+          description: 'Output format'
+      },
+      output: {
+          type: 'string',
+          alias: 'o',
+          description: 'Output file path (default: cases/<id>/solution.md)'
+      }
+  }, async (argv: any) => {
+      try {
+          const c = await store.load(argv.id);
+          
+          if (c.state !== CaseState.Resolve && c.state !== CaseState.ReadyForSolution && c.state !== CaseState.Postmortem) {
+              console.log(chalk.yellow('⚠️  Case must be resolved before generating solution document'));
+              console.log(chalk.gray(`   Current state: ${c.state}`));
+              console.log(chalk.gray(`   Run: piper resolve ${argv.id} first`));
+              return;
+          }
+          
+          console.log(chalk.bold.cyan(`\n📝 GENERATING SOLUTION DOCUMENT`));
+          console.log(chalk.gray(`   Case: ${c.title}`));
+          console.log(chalk.gray(`   Format: ${argv.format}`));
+          
+          // Load all evidence content
+          const evidenceSummary = await Promise.all(
+              c.evidence.slice(0, 10).map(async (ev: any) => {
+                  try {
+                      const content = await fs.readFile(ev.path, 'utf-8');
+                      return `File: ${ev.originalPath}\nSize: ${ev.sizeBytes} bytes\nContent excerpt: ${content.substring(0, 500)}...\n`;
+                  } catch {
+                      return `File: ${ev.originalPath} (could not read)`;
+                  }
+              })
+          );
+          
+          // Build comprehensive prompt for AI
+          const caseStartTime = c.events.length > 0 ? c.events[0].ts : 'unknown';
+          const prompt = `You are documenting a resolved troubleshooting case for a knowledge base. Generate a comprehensive solution document.
+
+CASE INFORMATION:
+- Title: ${c.title}
+- Context: ${c.context || 'General'}
+- Classification: ${c.classification || 'Unclassified'}
+- Duration: ${c.events.length} events from ${caseStartTime} to resolved
+
+PROBLEM SCOPE:
+${c.problemScope ? `
+Summary: ${c.problemScope.summary}
+Error Patterns: ${c.problemScope.errorPatterns.join(', ')}
+Affected Components: ${c.problemScope.affectedComponents.join(', ')}
+Impact: ${c.problemScope.impact || 'Not specified'}
+` : 'Problem scope not defined'}
+
+DIAGNOSTIC PROCESS:
+Questions Answered: ${c.questions.filter((q: any) => q.status === 'Answered').length}/${c.questions.length}
+${c.questions.filter((q: any) => q.status === 'Answered').map((q: any) => `
+Q: ${q.ask}
+A: ${q.answer}
+`).join('\n')}
+
+HYPOTHESES TESTED:
+${c.hypotheses.map((h: any, i: number) => `${i + 1}. ${h.description} [${h.status}]`).join('\n')}
+
+RESOLUTION:
+${c.outcome?.explanation || 'Resolution details not provided'}
+
+EVIDENCE COLLECTED:
+${c.evidence.length} files total
+${evidenceSummary.slice(0, 3).join('\n')}
+
+TIMELINE:
+${c.events.slice(-5).map((e: any) => `${e.ts}: ${e.type} - ${e.detail}`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+YOUR TASK: Generate ONLY the markdown solution document. No preamble, no commentary, just the document itself.
+
+Use this exact structure:
+
+# ${c.title}
+
+## Problem Summary
+[Clear, concise description of what went wrong]
+
+## Environment
+- System/service affected
+- Context (Azure DevOps, deployment, etc.)
+- When it occurred
+
+## Root Cause
+[Detailed explanation based on evidence]
+
+## Solution Steps
+1. [Exact command or action]
+2. [Configuration change with before/after]
+3. [Specific fix applied]
+
+## Verification
+How to confirm the fix worked:
+- Commands to run
+- Expected output
+- Success indicators
+
+## Prevention
+How to avoid this in the future:
+- Monitoring to add
+- Process improvements
+- Configuration best practices
+
+## Tools & Methods Used
+- piper CLI commands
+- Analysis techniques
+- Evidence sources
+
+## Key Evidence
+Reference to critical log files or screenshots that revealed the issue
+
+## Related Issues
+Common variations or similar problems
+
+---
+**Tags**: ${[c.context, c.classification, ...(c.problemScope?.errorPatterns || [])].filter(Boolean).join(', ')}
+
+CRITICAL: Output ONLY the markdown document. Start with the # heading. No "Here is...", no "I've created...", just the pure markdown document.`;
+
+          console.log(chalk.cyan('\n🤖 Analyzing case with AI...'));
+          
+          // Use copilot-auto to generate solution
+          const tempPromptFile = path.join(require('os').tmpdir(), `piper-solution-${Date.now()}.txt`);
+          await fs.writeFile(tempPromptFile, prompt);
+          
+          const { execSync } = require('child_process');
+          const command = process.env.COPILOT_AUTO_PATH || 'copilot-auto';
+          
+          const metaInstruction = `Read the file ${tempPromptFile} and follow all the instructions in it.`;
+          
+          const result = execSync(`${command} --direct "${metaInstruction.replace(/"/g, '\\"')}"`, {
+              encoding: 'utf-8',
+              maxBuffer: 1024 * 1024 * 10,
+              timeout: 180000,
+              stdio: ['pipe', 'pipe', 'pipe']
+          });
+          
+          // Clean up temp file
+          await fs.remove(tempPromptFile);
+          
+          // Extract solution from AI response (remove metadata)
+          const lines = result.split('\n');
+          const responseStart = lines.findIndex((line: string) => line.includes('Prompt:') || line.startsWith('📝'));
+          let solution = responseStart >= 0 ? lines.slice(responseStart + 2).join('\n') : result;
+          
+          // Remove trailing usage stats
+          const usageStart = solution.indexOf('Total usage est:');
+          if (usageStart > 0) {
+              solution = solution.substring(0, usageStart).trim();
+          }
+          
+          // Save solution to file
+          const outputPath = argv.output || path.join(rootDir, c.id, 'solution.md');
+          await fs.ensureDir(path.dirname(outputPath));
+          await fs.writeFile(outputPath, solution);
+          
+          // Update case state
+          c.state = CaseState.ReadyForSolution;
+          await store.save(c);
+          await store.appendEvent(argv.id, 'SolutionGenerated', `Generated solution document: ${outputPath}`);
+          
+          console.log(chalk.green('\n✅ Solution document generated!'));
+          console.log(chalk.white(`\n📄 Saved to: ${outputPath}`));
+          console.log(chalk.gray(`\n   ${solution.split('\n').length} lines, ${solution.length} characters`));
+          
+          console.log(chalk.bold.cyan('\n💡 NEXT STEPS'));
+          console.log(chalk.white('   • View solution: ') + chalk.gray(`cat ${outputPath}`));
+          console.log(chalk.white('   • Share on GitHub: Create issue/discussion with solution content'));
+          console.log(chalk.white('   • Index for search: Add to knowledge base or documentation'));
+          console.log(chalk.white('   • Create template: ') + chalk.gray(`Use solution to improve templates/${c.templateId || 'generic'}.json`));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Failed to generate solution: ${err.message}`));
           if (process.env.DEBUG) {
               console.error(err.stack);
           }
@@ -2211,5 +3328,384 @@ yargs(hideBin(process.argv))
           process.exit(1);
       }
   })
+  
+  // ============================================================================
+  // Template Management Commands
+  // ============================================================================
+  
+  .command('templates', 'Manage troubleshooting templates', {
+      stats: {
+          type: 'boolean',
+          description: 'Show template statistics',
+          default: false
+      },
+      learned: {
+          type: 'boolean',
+          description: 'Show only learned templates',
+          default: false
+      }
+  }, async (argv: any) => {
+      try {
+          // Show statistics
+          if (argv.stats) {
+              const stats = await templateMgr.getTemplateStats();
+              console.log(chalk.bold.cyan('\n📊 TEMPLATE STATISTICS\n'));
+              console.log(chalk.white(`Total Templates: ${chalk.bold(stats.total)}`));
+              console.log(chalk.green(`├─ Enabled: ${stats.enabled}`));
+              console.log(chalk.gray(`├─ Disabled: ${stats.disabled}`));
+              console.log(chalk.yellow(`└─ Learned: ${stats.learned}\n`));
+              
+              // Load all templates (including disabled for stats view)
+              const templatesDir = path.resolve('./templates');
+              const learnedDir = path.join(templatesDir, 'learned');
+              
+              // Standard templates
+              const standardFiles = await fs.readdir(templatesDir);
+              const standardTemplates: IssueTemplate[] = [];
+              for (const file of standardFiles) {
+                  if (file.endsWith('.json')) {
+                      const content = await fs.readJSON(path.join(templatesDir, file));
+                      standardTemplates.push(content);
+                  }
+              }
+              
+              if (standardTemplates.length > 0) {
+                  console.log(chalk.bold.white('📁 Standard Templates:'));
+                  for (const tpl of standardTemplates) {
+                      const status = tpl.enabled === false ? chalk.gray('❌ DISABLED') : chalk.green('✅');
+                      const usage = tpl.metadata?.usageCount || 0;
+                      console.log(chalk.white(`   ${status} ${tpl.id}`));
+                      console.log(chalk.gray(`      ${tpl.name} - ${usage} uses`));
+                  }
+                  console.log('');
+              }
+              
+              // Learned templates
+              if (await fs.pathExists(learnedDir)) {
+                  const learnedFiles = await fs.readdir(learnedDir);
+                  const learnedTemplates: IssueTemplate[] = [];
+                  for (const file of learnedFiles) {
+                      if (file.endsWith('.json')) {
+                          const content = await fs.readJSON(path.join(learnedDir, file));
+                          learnedTemplates.push(content);
+                      }
+                  }
+                  
+                  if (learnedTemplates.length > 0) {
+                      console.log(chalk.bold.yellow('🎓 Learned Templates:'));
+                      for (const tpl of learnedTemplates) {
+                          const status = tpl.enabled === false ? chalk.gray('❌ DISABLED') : chalk.green('✅');
+                          const usage = tpl.metadata?.usageCount || 0;
+                          const source = tpl.createdFrom ? chalk.gray(` (from case ${tpl.createdFrom})`) : '';
+                          console.log(chalk.white(`   ${status} ${tpl.id}`));
+                          console.log(chalk.gray(`      ${tpl.name} - ${usage} uses${source}`));
+                      }
+                      console.log('');
+                  }
+              }
+              
+              console.log(chalk.gray(`Use 'piper templates' for detailed list`));
+              return;
+          }
+          
+          // List templates
+          const allTemplates = await templateMgr.list();
+          
+          // Filter if learned-only
+          let templates = argv.learned 
+              ? allTemplates.filter(t => t.createdFrom) 
+              : allTemplates;
+          
+          if (templates.length === 0) {
+              console.log(chalk.yellow('No templates found'));
+              return;
+          }
+          
+          console.log(chalk.bold.cyan(`\n📚 TEMPLATES (${templates.length} total)\n`));
+          
+          for (const tpl of templates) {
+              const isLearned = tpl.createdFrom ? chalk.yellow('🎓 LEARNED') : chalk.white('📁 STANDARD');
+              const status = tpl.enabled === false ? chalk.gray(' [DISABLED]') : '';
+              
+              console.log(chalk.bold.white(`${isLearned} ${tpl.id}${status}`));
+              console.log(chalk.gray(`   Name: ${tpl.name}`));
+              console.log(chalk.gray(`   Description: ${tpl.description}`));
+              console.log(chalk.gray(`   Classification: ${tpl.classification || 'N/A'}`));
+              console.log(chalk.gray(`   Keywords: ${tpl.keywords.join(', ')}`));
+              console.log(chalk.gray(`   Questions: ${tpl.questions.length}`));
+              console.log(chalk.gray(`   Hypotheses: ${tpl.initialHypotheses?.length || 0}`));
+              console.log(chalk.gray(`   Usage: ${tpl.metadata?.usageCount || 0} times`));
+              
+              if (tpl.createdFrom) {
+                  console.log(chalk.yellow(`   Source Case: ${tpl.createdFrom}`));
+              }
+              if (tpl.basedOnTemplate) {
+                  console.log(chalk.yellow(`   Based On: ${tpl.basedOnTemplate}`));
+              }
+              console.log('');
+          }
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error managing templates: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-show <id>', 'Show detailed template information', {}, async (argv: any) => {
+      try {
+          const template = await templateMgr.load(argv.id);
+          
+          console.log(chalk.bold.cyan(`\n📄 TEMPLATE: ${template.id}\n`));
+          console.log(chalk.white(`Name: ${chalk.bold(template.name)}`));
+          console.log(chalk.white(`Version: ${template.version}`));
+          console.log(chalk.white(`Description: ${template.description}`));
+          console.log(chalk.white(`Classification: ${template.classification || 'N/A'}`));
+          console.log(chalk.white(`Status: ${template.enabled === false ? chalk.gray('DISABLED') : chalk.green('ENABLED')}`));
+          
+          if (template.createdFrom) {
+              console.log(chalk.yellow(`\nLearned from case: ${template.createdFrom}`));
+          }
+          if (template.basedOnTemplate) {
+              console.log(chalk.yellow(`Based on template: ${template.basedOnTemplate}`));
+          }
+          
+          console.log(chalk.bold.white('\n📋 Keywords:'));
+          template.keywords.forEach(kw => console.log(chalk.gray(`   • ${kw}`)));
+          
+          if (template.errorPatterns && template.errorPatterns.length > 0) {
+              console.log(chalk.bold.white('\n🔍 Error Patterns:'));
+              template.errorPatterns.forEach(pattern => console.log(chalk.gray(`   • ${pattern}`)));
+          }
+          
+          console.log(chalk.bold.white(`\n❓ Questions (${template.questions.length}):`));
+          template.questions.forEach((q, i) => {
+              const required = q.required ? chalk.red('*') : '';
+              console.log(chalk.white(`   ${i + 1}. ${q.ask}${required}`));
+              if (q.expectedFormat) {
+                  console.log(chalk.gray(`      Expected: ${q.expectedFormat}`));
+              }
+          });
+          
+          if (template.initialHypotheses && template.initialHypotheses.length > 0) {
+              console.log(chalk.bold.white(`\n💡 Initial Hypotheses (${template.initialHypotheses.length}):`));
+              template.initialHypotheses.forEach((h, i) => {
+                  console.log(chalk.gray(`   ${i + 1}. ${h.description}`));
+              });
+          }
+          
+          if (template.externalReferences && template.externalReferences.length > 0) {
+              console.log(chalk.bold.white('\n📚 References:'));
+              template.externalReferences.forEach(ref => {
+                  console.log(chalk.gray(`   • ${ref.title}: ${ref.url}`));
+              });
+          }
+          
+          console.log(chalk.bold.white('\n📊 Metadata:'));
+          console.log(chalk.gray(`   Created: ${template.metadata?.createdAt || 'N/A'}`));
+          console.log(chalk.gray(`   Updated: ${template.metadata?.updatedAt || 'N/A'}`));
+          console.log(chalk.gray(`   Usage Count: ${template.metadata?.usageCount || 0}`));
+          
+          console.log('');
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error loading template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-add <file>', 'Import a template from JSON file', {}, async (argv: any) => {
+      try {
+          const filePath = path.resolve(argv.file);
+          
+          if (!await fs.pathExists(filePath)) {
+              console.error(chalk.red(`File not found: ${argv.file}`));
+              process.exit(1);
+          }
+          
+          const template: IssueTemplate = await fs.readJSON(filePath);
+          
+          // Validate required fields
+          if (!template.id || !template.name || !template.version) {
+              console.error(chalk.red('Invalid template: missing required fields (id, name, version)'));
+              process.exit(1);
+          }
+          
+          // Check if template already exists
+          let exists = false;
+          try {
+              await templateMgr.load(template.id);
+              exists = true;
+          } catch {
+              // Template doesn't exist, that's fine
+          }
+          
+          if (exists) {
+              console.log(chalk.yellow(`\n⚠️  Template ${template.id} already exists`));
+              
+              const readline = require('readline').createInterface({
+                  input: process.stdin,
+                  output: process.stdout
+              });
+              
+              const answer = await new Promise<string>(resolve => {
+                  readline.question(chalk.yellow('Overwrite? [y/N] '), (ans: string) => resolve(ans));
+              });
+              
+              readline.close();
+              
+              if (!answer || !['y', 'yes'].includes(answer.toLowerCase())) {
+                  console.log(chalk.gray('Operation cancelled'));
+                  return;
+              }
+          }
+          
+          // Set metadata if not present
+          if (!template.metadata) {
+              template.metadata = {
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  usageCount: 0
+              };
+          }
+          
+          // Default enabled to true
+          if (template.enabled === undefined) {
+              template.enabled = true;
+          }
+          
+          await templateMgr.registerTemplate(template);
+          
+          console.log(chalk.green(`\n✅ Template added: ${template.id}`));
+          console.log(chalk.gray(`   Name: ${template.name}`));
+          console.log(chalk.gray(`   Version: ${template.version}`));
+          console.log(chalk.gray(`   Location: templates/${template.createdFrom ? 'learned/' : ''}${template.id}.json\n`));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error adding template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-export <id> <file>', 'Export a template to JSON file', {}, async (argv: any) => {
+      try {
+          const template = await templateMgr.load(argv.id);
+          const filePath = path.resolve(argv.file);
+          
+          await fs.writeJSON(filePath, template, { spaces: 2 });
+          
+          console.log(chalk.green(`\n✅ Template exported: ${argv.id}`));
+          console.log(chalk.gray(`   File: ${filePath}`));
+          console.log(chalk.gray(`   Name: ${template.name}\n`));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error exporting template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-disable <id>', 'Disable a template (soft delete)', {}, async (argv: any) => {
+      try {
+          await templateMgr.disableTemplate(argv.id);
+          
+          console.log(chalk.green(`\n✅ Template disabled: ${argv.id}`));
+          console.log(chalk.gray('   Template will not be used for case matching'));
+          console.log(chalk.gray(`   To re-enable: piper templates-enable ${argv.id}\n`));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error disabling template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-enable <id>', 'Re-enable a disabled template', {}, async (argv: any) => {
+      try {
+          // Load template from both possible locations
+          const templatesDir = path.resolve('./templates');
+          const learnedDir = path.join(templatesDir, 'learned');
+          
+          let templatePath: string | null = null;
+          const standardPath = path.join(templatesDir, `${argv.id}.json`);
+          const learnedPath = path.join(learnedDir, `${argv.id}.json`);
+          
+          if (await fs.pathExists(standardPath)) {
+              templatePath = standardPath;
+          } else if (await fs.pathExists(learnedPath)) {
+              templatePath = learnedPath;
+          } else {
+              console.error(chalk.red(`Template not found: ${argv.id}`));
+              process.exit(1);
+          }
+          
+          const template = await fs.readJSON(templatePath);
+          template.enabled = true;
+          delete template.disabled_at; // Remove disable timestamp
+          await fs.writeJSON(templatePath, template, { spaces: 2 });
+          
+          console.log(chalk.green(`\n✅ Template enabled: ${argv.id}`));
+          console.log(chalk.gray('   Template will now be used for case matching\n'));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error enabling template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
+  .command('templates-remove <id>', 'Permanently delete a template', {
+      force: {
+          type: 'boolean',
+          alias: 'f',
+          description: 'Force deletion without confirmation',
+          default: false
+      }
+  }, async (argv: any) => {
+      try {
+          const template = await templateMgr.load(argv.id);
+          
+          if (!argv.force) {
+              console.log(chalk.yellow(`\n⚠️  WARNING: This will permanently delete template "${template.name}"`));
+              console.log(chalk.gray('   This action cannot be undone\n'));
+              
+              const readline = require('readline').createInterface({
+                  input: process.stdin,
+                  output: process.stdout
+              });
+              
+              const answer = await new Promise<string>(resolve => {
+                  readline.question(chalk.yellow('Are you sure? [y/N] '), (ans: string) => resolve(ans));
+              });
+              
+              readline.close();
+              
+              if (!answer || !['y', 'yes'].includes(answer.toLowerCase())) {
+                  console.log(chalk.gray('Operation cancelled'));
+                  return;
+              }
+          }
+          
+          // Find and delete template file
+          const templatesDir = path.resolve('./templates');
+          const learnedDir = path.join(templatesDir, 'learned');
+          
+          const standardPath = path.join(templatesDir, `${argv.id}.json`);
+          const learnedPath = path.join(learnedDir, `${argv.id}.json`);
+          
+          if (await fs.pathExists(standardPath)) {
+              await fs.remove(standardPath);
+          } else if (await fs.pathExists(learnedPath)) {
+              await fs.remove(learnedPath);
+          } else {
+              console.error(chalk.red(`Template file not found: ${argv.id}`));
+              process.exit(1);
+          }
+          
+          console.log(chalk.green(`\n✅ Template permanently deleted: ${argv.id}`));
+          console.log(chalk.gray(`   Consider using 'templates-disable' for soft delete in the future\n`));
+          
+      } catch (err: any) {
+          console.error(chalk.red(`Error removing template: ${err.message}`));
+          process.exit(1);
+      }
+  })
+  
   .strict()
   .parse();

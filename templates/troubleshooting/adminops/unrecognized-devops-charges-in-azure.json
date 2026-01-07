@@ -1,0 +1,36 @@
+{
+  "id": "unrecognized-devops-charges-in-azure",
+  "version": "1.0.0",
+  "name": "**Scenario**",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "azure-devops",
+    "devops",
+    "**scenario**"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "- Someone with privileges within the Azure Subscription has set up billing for an Azure Devops organization. Each organization can use only one Azure subscription for billing.",
+      "likelihood": "High"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.995Z",
+    "updatedAt": "2026-01-07T18:11:38.995Z"
+  }
+}

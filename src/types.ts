@@ -70,20 +70,60 @@ export interface Hypothesis {
   evidenceRefs: string[];
 }
 
+export interface ScopingCategory {
+  category: string;
+  requiredFields: string[];
+}
+
+export interface ScopingTemplate {
+  id: string;
+  title: string;
+  description: string;
+  templateType: 'scoping';
+  classification: {
+    domain: string;
+    area: string;
+    subArea?: string;
+    tags: string[];
+  };
+  metadata: {
+    source: string;
+    stage: 'intake';
+    customerFacing: boolean;
+    createdAt: string;
+  };
+  scopingCategories: ScopingCategory[];
+  totalRequiredFields?: number; // Count of all required fields
+  externalReferences?: Array<{ title: string; url: string }>;
+}
+
 export interface IssueTemplate {
   id: string;
   version: string;
   name: string;
   description: string;
+  templateType?: 'troubleshooting' | 'scoping'; // Template usage stage
   keywords: string[]; // For matching
   errorPatterns?: string[]; // Regex patterns for error matching
+  patterns?: string[]; // Alternative name for compatibility
   questions: Omit<Question, 'status' | 'answer'>[]; // Template questions
   initialHypotheses?: Omit<Hypothesis, 'status' | 'evidenceRefs'>[];
   classification?: string; // Issue type: Configuration, Network, Permissions, etc.
+  externalReferences?: Array<{ title: string; url: string }>; // Links to documentation
+  
+  // Learned template metadata
+  enabled?: boolean; // Can be disabled without deleting
+  createdFrom?: string; // Case ID this was learned from
+  basedOnTemplate?: string; // Parent template ID if this is a refinement
+  created?: string; // ISO timestamp
+  disabled_at?: string; // When it was disabled
+  
   metadata?: {
+    source?: string;
     createdAt: string;
     updatedAt: string;
     usageCount?: number;
+    incomplete?: boolean; // Template has no content yet
   };
 }
 
@@ -125,6 +165,67 @@ export interface Case {
     evidenceSummary: string;
     reason?: string; // Why the scope was updated
   }>;
+  metadata?: { // Additional tracking and audit information
+    rejectedTemplates?: Array<{
+      templateId: string;
+      templateName: string;
+      score?: number;
+      timestamp: string;
+      reason: string;
+    }>;
+    scopeRefinements?: Array<{
+      version: number;
+      oldSummary: string;
+      newSummary: string;
+      timestamp: string;
+      userInitiated: boolean;
+    }>;
+    detailedProblemStatement?: string; // Enhanced problem description with error details
+    decisionJournal?: Array<{
+      timestamp: string;
+      stage: CaseState;
+      agent: string;
+      decision: string;
+      reasoning: string;
+      evidenceRefs: string[];
+      confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+      leadAgentReview?: {
+        quality: 'PASS' | 'NEEDS_IMPROVEMENT' | 'FAIL';
+        concerns: string[];
+      };
+    }>;
+    scopeAnalysis?: { // AI-generated scope analysis stored for reference
+      timestamp: string;
+      agent: string;
+      summary: string;
+      errorPatterns: string[];
+      affectedComponents: string[];
+      impact: string;
+      confidence: number; // 0-100
+    };
+    remediationPlan?: { // AI-generated troubleshooting plan
+      timestamp: string;
+      agent: string;
+      rootCause: string;
+      steps: Array<{
+        order: number;
+        action: string;
+        commands?: string[];
+        expectedOutcome: string;
+      }>;
+      verificationSteps: string[];
+      planMarkdown?: string; // Full markdown version of the plan
+    };
+    templateEffectiveness?: { // Track how well templates matched the actual problem
+      templateId?: string;
+      templateName?: string;
+      initialScore?: number; // Match score when template was applied (0-100)
+      accuracyScore?: number; // How accurate was the template after resolution (0-100)
+      wasAccurate: boolean; // Did template lead to correct diagnosis?
+      shouldCreateLearnedTemplate: boolean; // Should we generate improved template?
+      timestamp: string;
+    };
+  };
   final?: {
     desiredOutcome: string;
     acceptanceCriteria: string[];

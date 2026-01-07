@@ -1,0 +1,74 @@
+{
+  "id": "boards-scoping-questions",
+  "version": "1.0.0",
+  "name": "Azure Boards Quick SLA Guide -Services OR Server",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "boards",
+    "work-item",
+    "board",
+    "backlog",
+    "query",
+    "sprint",
+    "server",
+    "azure-devops",
+    "devops",
+    "azure"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Boards",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "configuration"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "Do you have any filters currently set?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q2",
+      "ask": "Is the query a stored query or a new query?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q3",
+      "ask": "Do the results improve if the query is simplified?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q4",
+      "ask": "Is the project using an Inherited Process Template or an XML/Hosted XML process template?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Capture a browser trace for troubleshooting - Azure DevOps | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/user-guide/capture-browser-trace?view=azure-devops&tabs=microsoft-edge"
+    },
+    {
+      "title": "How to collect a network trace | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-network-trace"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.941Z",
+    "updatedAt": "2026-01-07T18:11:38.941Z"
+  }
+}

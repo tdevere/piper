@@ -1,0 +1,40 @@
+{
+  "id": "remove-hung-up-or-stale-jobs-from-the-agent-pool-jobs-page",
+  "version": "1.0.0",
+  "name": "Remove-Hung-up-or-Stale-Jobs-from-the-Agent-Pool-Jobs-Page",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "build",
+    "agent",
+    "work-item",
+    "query",
+    "server",
+    "tfs",
+    "azure-devops",
+    "devops"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.858Z",
+    "updatedAt": "2026-01-07T18:11:38.858Z"
+  }
+}

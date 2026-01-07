@@ -1,0 +1,44 @@
+{
+  "id": "ssh-key-validity",
+  "version": "1.0.0",
+  "name": "SSH Key Expiration & Toggle",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "deployment",
+    "git",
+    "repo",
+    "query",
+    "authentication",
+    "permission",
+    "security",
+    "server"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "failure",
+      "authentication",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "- Backend enforcement was not active prior to rollout.",
+      "likelihood": "High"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.904Z",
+    "updatedAt": "2026-01-07T18:11:38.904Z"
+  }
+}

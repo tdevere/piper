@@ -1,0 +1,56 @@
+{
+  "id": "work-item-missing-from-backlog-or-board",
+  "version": "1.0.0",
+  "name": "Work-item-missing-from-Backlog-or-Board",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "boards",
+    "repo",
+    "work-item",
+    "board",
+    "backlog",
+    "query",
+    "sprint",
+    "permission",
+    "server",
+    "tfs"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Boards",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions",
+      "configuration"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "Is the work item not showing for one user or for more than one?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q2",
+      "ask": "Does the work item not appear in both the backlog and board? Just the board? Just the backlog?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "here",
+      "url": "https://docs.microsoft.com/en-us/azure/devops/boards/backlogs/resolve-backlog-reorder-issues?view=azure-devops#how-backlogs-and-boards-display-nested-items"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.952Z",
+    "updatedAt": "2026-01-07T18:11:38.952Z"
+  }
+}

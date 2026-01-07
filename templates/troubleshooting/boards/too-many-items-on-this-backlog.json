@@ -1,0 +1,35 @@
+{
+  "id": "too-many-items-on-this-backlog",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "boards",
+    "work-item",
+    "backlog",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Boards",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.950Z",
+    "updatedAt": "2026-01-07T18:11:38.950Z"
+  }
+}

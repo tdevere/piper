@@ -28,7 +28,160 @@ export class LLMClient {
   }
 
   async consult(c: Case, promptProfile: string): Promise<AgentResponse> {
-    // 1. Try to find a specific fixture: {Profile}.{State}.json
+    // Map case state to specialized agent
+    const agentForState: Record<string, string> = {
+      'Intake': 'intake-agent',
+      'Normalize': 'scope-agent',
+      'Classify': 'classify-agent',
+      'Plan': 'troubleshoot-agent',
+      'Execute': 'resolve-agent',
+      'Evaluate': 'resolve-agent',
+      'Resolve': 'resolve-agent',
+      'ReadyForSolution': 'solution-agent'
+    };
+
+    const agentName = agentForState[c.state] || 'classify-agent';
+    
+    // Try to load agent profile (resolve from current working directory)
+    const agentProfilePath = path.resolve(process.cwd(), 'agents', 'stage-agents', `${agentName}.profile.md`);
+    
+    let agentProfile = '';
+    if (await fs.pathExists(agentProfilePath)) {
+      agentProfile = await fs.readFile(agentProfilePath, 'utf-8');
+    } else {
+      console.log(`⚠️  Agent profile not found: ${agentProfilePath}`);
+      // Fallback to fixture-based system
+      return await this.consultWithFixtures(c);
+    }
+
+    // Try LLM-based consultation with agent profile
+    if (this.llmEnabled && (this.llmProvider === 'copilot' || this.llmProvider === 'copilot-auto')) {
+      try {
+        return await this.consultWithAgent(c, agentProfile, agentName);
+      } catch (error: any) {
+        console.error(`❌ Agent ${agentName} consultation failed:`, error.message);
+        console.log('⚙️  Falling back to pattern-based analysis...');
+        return await this.fallbackAnalysis(c, agentName);
+      }
+    }
+
+    // Fallback to fixture system if LLM disabled
+    return await this.consultWithFixtures(c);
+  }
+
+  private async consultWithAgent(c: Case, agentProfile: string, agentName: string): Promise<AgentResponse> {
+    const { execSync } = require('child_process');
+    const os = require('os');
+    
+    // Load evidence content
+    const evidenceContent = await this.loadEvidenceContent(c);
+    const truncatedEvidence = evidenceContent.substring(0, 20000); // Limit size
+
+    // Build context-aware prompt
+    const caseContext = `
+CASE CONTEXT:
+- Title: ${c.title}
+- State: ${c.state}
+- Classification: ${c.classification || 'Not yet classified'}
+- Context: ${c.context || 'general'}
+- Evidence Files: ${c.evidence.length}
+
+PROBLEM SCOPE:
+${c.problemScope?.summary || c.formal?.actual || 'No detailed scope yet'}
+
+${c.problemScope?.errorPatterns?.length ? `ERROR PATTERNS:\n${c.problemScope.errorPatterns.join('\n')}` : ''}
+
+${c.problemScope?.affectedComponents?.length ? `AFFECTED COMPONENTS:\n${c.problemScope.affectedComponents.join(', ')}` : ''}
+
+CURRENT HYPOTHESES:
+${c.hypotheses.map((h, i) => `${i + 1}. ${h.description} (${h.status})`).join('\n') || 'None yet'}
+
+EVIDENCE CONTENT (truncated):
+${truncatedEvidence}
+`;
+
+    const fullPrompt = `${agentProfile}
+
+---
+
+${caseContext}
+
+Based on the agent profile instructions above and the case context, provide your analysis as a JSON object with this structure:
+
+{
+  "thoughtProcess": "Your detailed reasoning",
+  "classification": "Problem category (for Classify state)",
+  "newQuestions": [{"id": "q1", "ask": "Question text", "required": true}],
+  "newHypotheses": [{"id": "h1", "description": "Hypothesis text"}],
+  "recommendedState": "NextState"
+}
+
+Return ONLY the JSON object, no additional text.`;
+
+    // Write prompt to temp file
+    const tempFile = path.join(os.tmpdir(), `piper-agent-${agentName}-${Date.now()}.txt`);
+    await fs.writeFile(tempFile, fullPrompt);
+
+    try {
+      const command = process.env.COPILOT_PATH || 'copilot';
+      
+      console.log(`🤖 Consulting ${agentName}...`);
+      
+      // Instead of passing the entire prompt, just tell copilot to read the file
+      // Use template string with proper escaping for PowerShell
+      const promptInstruction = `Read the file ${tempFile} and follow its instructions exactly. The file contains a detailed agent profile and case analysis prompt. Return your response as valid JSON matching the schema specified in the file.`;
+      
+      // Use single quotes in PowerShell to prevent expansion/splitting
+      const psCommand = `powershell -Command "& ${command} -p '${promptInstruction}' --allow-all-tools 2>&1"`;
+      
+      const result = execSync(psCommand, {
+        encoding: 'utf-8',
+        maxBuffer: 1024 * 1024 * 10,
+        timeout: 120000 // 2 minutes
+      });
+
+      await fs.remove(tempFile);
+
+      // Parse JSON response - try multiple extraction methods
+      // Method 1: Try to find markdown code block first (copilot wraps JSON in ```json blocks)
+      let jsonMatch = result.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+      
+      // Method 2: Find JSON block with curly braces
+      if (!jsonMatch) {
+        jsonMatch = result.match(/\{[\s\S]*\}/);
+      }
+
+      // Method 3: Try to extract from any curly brace to last curly brace
+      if (!jsonMatch) {
+        const firstBrace = result.indexOf('{');
+        const lastBrace = result.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          jsonMatch = [result.substring(firstBrace, lastBrace + 1)];
+        }
+      }
+      
+      if (jsonMatch) {
+        try {
+          const jsonText = jsonMatch[1] || jsonMatch[0]; // Use capture group if available
+          const response = JSON.parse(jsonText);
+          return response as AgentResponse;
+        } catch (parseError: any) {
+          console.error(`JSON parse error: ${parseError.message}`);
+          console.error(`Attempted to parse: ${(jsonMatch[1] || jsonMatch[0]).substring(0, 500)}...`);
+          throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+        }
+      } else {
+        console.error(`No JSON found in response. Full output:\n${result}`);
+        throw new Error('No valid JSON found in agent response');
+      }
+    } catch (error: any) {
+      await fs.remove(tempFile).catch(() => {});
+      throw error;
+    }
+  }
+
+  private async consultWithFixtures(c: Case): Promise<AgentResponse> {
+    // Legacy fixture-based system (fallback)
     const specialist = c.specialistProfile || 'generic';
     const fixtureName = `${specialist}.${c.state}.json`;
     const fixturePath = path.join(this.fixturesDir, fixtureName);
@@ -37,16 +190,127 @@ export class LLMClient {
       return fs.readJSON(fixturePath);
     }
 
-    // 2. Fallback to Generic
     const genericPath = path.join(this.fixturesDir, `generic.${c.state}.json`);
     if (await fs.pathExists(genericPath)) {
-        return fs.readJSON(genericPath);
+      return fs.readJSON(genericPath);
     }
     
-    // 3. Fallback: No-Op response
     return {
-        thoughtProcess: "No specific intelligence logic found for this state/profile combination (Mock).",
-        recommendedState: c.state // Stay put
+      thoughtProcess: "No specific intelligence logic found for this state/profile combination (Mock).",
+      recommendedState: c.state
+    };
+  }
+
+  private async fallbackAnalysis(c: Case, agentName: string): Promise<AgentResponse> {
+    // Pattern-based fallback when LLM unavailable
+    switch (agentName) {
+      case 'classify-agent':
+        return await this.classifyByPatterns(c);
+      
+      case 'troubleshoot-agent':
+        return await this.generateBasicPlan(c);
+      
+      case 'resolve-agent':
+        return await this.detectResolution(c);
+      
+      default:
+        return {
+          thoughtProcess: `Fallback analysis for ${agentName}. LLM unavailable.`,
+          recommendedState: c.state
+        };
+    }
+  }
+
+  private async classifyByPatterns(c: Case): Promise<AgentResponse> {
+    // Pattern-based classification (deterministic)
+    const evidenceContent = await this.loadEvidenceContent(c);
+    const lower = evidenceContent.toLowerCase();
+
+    let classification = 'General';
+    let reasoning = 'Generic classification';
+    
+    // Quota errors
+    if (/quotaexceeded|quota.*exceed|cores needed.*exceed/i.test(evidenceContent)) {
+      classification = 'Quota - Subscription Limits';
+      reasoning = 'Detected quota-related error patterns in evidence';
+    }
+    // Permission errors
+    else if (/authorizationfailed|403 forbidden|does not have authorization/i.test(evidenceContent)) {
+      classification = 'Authentication - RBAC';
+      reasoning = 'Detected authorization/permission error patterns';
+    }
+    // Networking errors
+    else if (/timeout|connectionrefused|nameresolutionfailure|unable to connect/i.test(evidenceContent)) {
+      classification = 'Networking - Connectivity';
+      reasoning = 'Detected network connectivity error patterns';
+    }
+    // Deployment errors (check if not quota/auth root cause)
+    else if (/deploymentfailed|invalidtemplate|resourcenotfound|validationfailed/i.test(evidenceContent)) {
+      classification = 'Deployment - ARM/Bicep';
+      reasoning = 'Detected deployment-related error patterns';
+    }
+    // Pipeline/Agent errors
+    else if (/agent.*offline|no agent could be found|unable to connect to agent pool/i.test(evidenceContent)) {
+      classification = 'Pipelines - Agent Issues';
+      reasoning = 'Detected pipeline agent error patterns';
+    }
+
+    return {
+      thoughtProcess: `Pattern-based classification: ${reasoning}`,
+      classification,
+      newQuestions: [
+        {
+          id: 'q1',
+          ask: 'What is the exact error message from the logs?',
+          required: true,
+          status: 'Open' as const,
+          expectedFormat: 'text' as const
+        }
+      ],
+      recommendedState: 'Plan' as any
+    };
+  }
+
+  private async generateBasicPlan(c: Case): Promise<AgentResponse> {
+    // Basic remediation plan when LLM unavailable
+    return {
+      thoughtProcess: 'Generating template-based troubleshooting plan',
+      newQuestions: [
+        {
+          id: 'q1',
+          ask: 'Have you verified the configuration matches requirements?',
+          required: true,
+          status: 'Open' as const,
+          expectedFormat: 'text' as const
+        },
+        {
+          id: 'q2',
+          ask: 'Have you checked for recent changes that might have caused this?',
+          required: false,
+          status: 'Open' as const,
+          expectedFormat: 'text' as const
+        }
+      ],
+      recommendedState: 'Execute' as any
+    };
+  }
+
+  private async detectResolution(c: Case): Promise<AgentResponse> {
+    // Check for resolution indicators
+    const evidenceContent = await this.loadEvidenceContent(c);
+    const hasSuccess = /succeeded|completed|successful|200 ok/i.test(evidenceContent);
+    const hasErrors = /error|failed|exception/i.test(evidenceContent);
+
+    const verdict = hasSuccess && !hasErrors ? 'Likely Resolved' : 'Needs More Evidence';
+
+    return {
+      thoughtProcess: `Resolution detection: ${verdict}`,
+      outcome: {
+        verdict,
+        explanation: hasSuccess ? 'Success indicators found in evidence' : 'Insufficient evidence of resolution',
+        evidenceRefs: []
+      },
+      recommendedState: hasSuccess ? 'ReadyForSolution' as any : 'Execute' as any
     };
   }
 
@@ -141,13 +405,13 @@ Respond in JSON format:
 }`;
 
     try {
-      // Call copilot-auto wrapper in direct mode
+      // Call copilot directly
       const { execSync } = require('child_process');
       const os = require('os');
       const fs = require('fs-extra');
       const path = require('path');
       
-      const command = process.env.COPILOT_AUTO_PATH || 'copilot-auto';
+      const command = process.env.COPILOT_PATH || 'copilot';
       
       // Build structured prompt for direct mode
       const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nProvide your answer in this format:\nQUESTION_ID: <id>\nANSWER: <answer>\nCONFIDENCE: high|medium|low\nALTERNATIVES: <alternative1>; <alternative2>\nSEARCH: <search terms>\n\n(Repeat for each question you can answer)`;
@@ -156,8 +420,8 @@ Respond in JSON format:
       const tempFile = path.join(os.tmpdir(), `piper-analyze-${Date.now()}.txt`);
       await fs.writeFile(tempFile, fullPrompt);
       
-      // Execute copilot-auto with input redirection
-      const result = execSync(`powershell -Command "Get-Content '${tempFile}' | & ${command} --interactive"`, {
+      // Execute copilot with input redirection
+      const result = execSync(`powershell -Command "Get-Content '${tempFile}' | & ${command}"`, {
         encoding: 'utf-8',
         maxBuffer: 1024 * 1024 * 10,
         timeout: 60000,
@@ -182,9 +446,7 @@ Respond in JSON format:
 
   async generateGuidance(prompt: string): Promise<string> {
     // Generate dynamic guidance for help command
-    if (process.env.DEBUG) {
-      console.log(`[LLMClient.generateGuidance] Provider: ${this.llmProvider}, Enabled: ${this.llmEnabled}`);
-    }
+    console.log(`[LLMClient.generateGuidance] Provider: ${this.llmProvider}, Enabled: ${this.llmEnabled}`);
     
     if (this.llmEnabled && (this.llmProvider === 'copilot' || this.llmProvider === 'copilot-auto')) {
       try {
@@ -193,47 +455,34 @@ Respond in JSON format:
         const fs = require('fs-extra');
         const path = require('path');
         
-        const command = process.env.COPILOT_AUTO_PATH || 'copilot-auto';
+        const command = process.env.COPILOT_PATH || 'copilot';
         
         // Write the actual prompt to a temp file
         const tempFile = path.join(os.tmpdir(), `piper-prompt-${Date.now()}.txt`);
         await fs.writeFile(tempFile, prompt);
         
-        // Direct instruction to read and follow the file
-        const metaInstruction = `Read the file ${tempFile} and follow all the instructions in it.`;
+        console.log(`[LLMClient] Calling copilot with temp file: ${tempFile}`);
         
         try {
-          if (process.env.DEBUG) {
-            console.log(`[LLMClient] Calling copilot-auto with temp file: ${tempFile}`);
-          }
+          // Use the same approach as consultWithAgent - simple file reading instruction
+          const promptInstruction = `Read the file ${tempFile} and follow its instructions exactly. Provide detailed remediation steps.`;
           
-          // Call copilot-auto with meta-instruction
-          const result = execSync(`${command} --direct "${metaInstruction.replace(/"/g, '\\"')}"`, {
+          // Call copilot with -p flag
+          const psCommand = `powershell -Command "& ${command} -p '${promptInstruction}' --allow-all-tools 2>&1"`;
+          
+          const result = execSync(psCommand, {
             encoding: 'utf-8',
             maxBuffer: 1024 * 1024 * 5,
-            timeout: 120000,
-            stdio: ['pipe', 'pipe', 'pipe']
+            timeout: 120000
           });
           
           await fs.remove(tempFile);
           
-          // Extract just the response, removing copilot-auto metadata
-          const lines = result.split('\n');
-          const responseStart = lines.findIndex((line: string) => line.includes('Prompt:') || line.startsWith('📝'));
-          if (responseStart >= 0) {
-            // Skip prompt echo and metadata, get actual response
-            const responsePart = lines.slice(responseStart + 2).join('\n').trim();
-            // Remove trailing usage statistics
-            const usageStart = responsePart.indexOf('Total usage est:');
-            const cleaned = usageStart > 0 ? responsePart.substring(0, usageStart).trim() : responsePart;
-            
-            if (process.env.DEBUG) {
-              console.log(`[LLMClient] Got response (${cleaned.length} chars)`);
-            }
-            
-            return cleaned;
-          }
-          return result.trim();
+          // Extract response - copilot returns markdown with usage stats at the end
+          const usageStart = result.indexOf('Total usage est:');
+          const cleaned = usageStart > 0 ? result.substring(0, usageStart).trim() : result.trim();
+          
+          return cleaned;
         } finally {
           // Ensure cleanup even if error
           if (await fs.pathExists(tempFile)) {

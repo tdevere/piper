@@ -1,0 +1,39 @@
+{
+  "id": "azure-artifacts-quick-fqr-guide",
+  "title": "Azure Artifacts Quick FQR Guide",
+  "description": "Customer-facing scoping questionnaire for Artifacts issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Artifacts",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Pipelines/Artifacts-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "Clarify the scope of the issue\n  Is the issue related to Build Artifacts or Azure Artifacts?",
+        "Determine when the issue occurs\n  Does it happen during artifact generation, downloading, or publishing?",
+        "Identify the pipeline context\n  • What task is being used?\n  • Is the issue in a Build or Release pipeline?\n  • If related to Release, gather both Build and Release pipeline logs with debug enabled.",
+        "Capture error details\n  • Are there any error messages?\n  • Provide the exact error text.\n  • Upload screenshots of the errors to DTM.",
+        "Check billing tier\n  • Is the Azure Artifacts billing tier Free or Paid?\n  • If Paid, what is the artifacts usage limit?",
+        "Verify feed location\n  Is the feed located in the same project or a different project?",
+        "Review feed permissions\n  What are the permissions set on the Artifact Feed?",
+        "Upload logs\n  Ensure debug-enabled logs are uploaded.",
+        "Include package configuration files\n  Attach any relevant package config files.\n```"
+      ]
+    }
+  ],
+  "totalRequiredFields": 9
+}

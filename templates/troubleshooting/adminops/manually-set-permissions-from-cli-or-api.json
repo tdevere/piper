@@ -1,0 +1,55 @@
+{
+  "id": "manually-set-permissions-from-cli-or-api",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "repos",
+    "git",
+    "repo",
+    "permission",
+    "security",
+    "token",
+    "test",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Repos",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Public documentation",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/organizations/security/namespace-reference?view=azure-devops"
+    },
+    {
+      "title": "CLI",
+      "url": "https://docs.microsoft.com/en-us/cli/azure/devops/project?view=azure-cli-latest#ext-azure-devops-az-devops-project-show"
+    },
+    {
+      "title": "CLI",
+      "url": "https://docs.microsoft.com/en-us/cli/azure/devops/security/group?view=azure-cli-latest#az-devops-security-group-list"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.012Z",
+    "updatedAt": "2026-01-07T18:11:39.012Z"
+  }
+}

@@ -1,8 +1,8 @@
-import { Orchestrator } from '../orchestration/Orchestrator';
-import { CaseStore } from '../storage/CaseStore';
-import { StateMachine } from '../orchestration/StateMachine';
-import { LLMClient } from '../llm/LLMClient';
-import { CaseState, Case } from '../types';
+import { Orchestrator } from '../src/orchestration/Orchestrator';
+import { CaseStore } from '../src/storage/CaseStore';
+import { StateMachine } from '../src/orchestration/StateMachine';
+import { LLMClient } from '../src/llm/LLMClient';
+import { CaseState, Case } from '../src/types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 

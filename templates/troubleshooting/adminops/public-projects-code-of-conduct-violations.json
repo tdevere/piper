@@ -1,0 +1,34 @@
+{
+  "id": "public-projects-code-of-conduct-violations",
+  "version": "1.0.0",
+  "name": "Scenario",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "general",
+    "azure-devops",
+    "devops",
+    "scenario"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "General",
+    "tags": [
+      "troubleshooting",
+      "diagnostic"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "Issue may be caused by configuration or environment mismatch",
+      "likelihood": "Medium"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.032Z",
+    "updatedAt": "2026-01-07T18:11:39.032Z"
+  }
+}

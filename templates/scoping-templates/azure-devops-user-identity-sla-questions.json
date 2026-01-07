@@ -1,0 +1,37 @@
+{
+  "id": "azure-devops-user-identity-sla-questions",
+  "title": "🔍 Azure DevOps User Identity SLA Questions",
+  "description": "Customer-facing scoping questionnaire for AdminOps issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "AdminOps",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/AdminOps/AzDevOps-Identity-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "Go to https://aka.ms/vssignout and let it complete.",
+        "In the same browser session, go to: https://aka.ms/vssignout?wa=wsignoutcleanup1.0 and let it complete.  You’ll see a little green check mark when you run it.",
+        "Delete cookies using `CTRL+SHIFT+DEL` in most browsers.",
+        "Close all instances of the browser.",
+        "Open the browser in a private/incognito session.",
+        "Go to your DevOps Org: `https://dev.azure.com/ORGNAME`",
+        "Log in using your user account."
+      ]
+    }
+  ],
+  "totalRequiredFields": 7
+}

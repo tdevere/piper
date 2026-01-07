@@ -1,0 +1,41 @@
+{
+  "id": "create-build-pipeline-permission",
+  "version": "1.0.0",
+  "name": "Scenarios",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "build",
+    "classic",
+    "permission",
+    "security",
+    "server",
+    "scenarios"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "failure",
+      "authentication",
+      "permissions"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "------------",
+      "likelihood": "High"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.820Z",
+    "updatedAt": "2026-01-07T18:11:38.821Z"
+  }
+}

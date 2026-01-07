@@ -13,9 +13,38 @@ demo-*.txt
 # Temporary working files
 .piper-scope-*.txt
 .piper-prompt-*.txt
+.generate-*.txt
 
 # Documentation files that may contain customer examples
 demo-interactive-help.md
+
+# Log files
+*.log
+db.log
+pipeline.log
+
+# Conversion artifacts
+conversion-log.txt
+conversion-output.txt
+
+# Test zip files explicitly
+test-*.zip
+
+# Personal notes
+my-issue.md
+*-TODO.md
+*-NOTES.md
+
+# Archive/old docs
+archived/
+old-docs/
+
+# Session data
+.sessions/
+
+# Demo artifacts
+demo-temp/
+demo-*.zip
 
 # Secrets and credentials (NEVER COMMIT)
 .env

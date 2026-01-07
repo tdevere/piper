@@ -1,0 +1,54 @@
+{
+  "id": "change-org-owner",
+  "version": "1.0.0",
+  "name": "Change-Org-Owner",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "administration",
+    "access",
+    "azure-devops",
+    "devops",
+    "change-org-owner"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Administration",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "failure",
+      "authentication",
+      "permissions"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "Has the customer tried to self-serve the change?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "Get the list of DevOps organizations in an Entra ID",
+      "url": "https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/get-list-of-organizations-connected-to-azure-active-directory?view=azure-devops"
+    },
+    {
+      "title": "Assign owner to an orphaned DevOps organization in Entra ID",
+      "url": "https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/resolve-orphaned-organization"
+    },
+    {
+      "title": "Restrict new DevOps organization creation in Entra ID",
+      "url": "https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/azure-ad-tenant-policy-restrict-org-creation"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:39.022Z",
+    "updatedAt": "2026-01-07T18:11:39.022Z"
+  }
+}

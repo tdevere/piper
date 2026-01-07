@@ -1,4 +1,4 @@
-import { Redactor } from '../evidence/Redactor';
+import { Redactor } from '../src/evidence/Redactor';
 
 describe('Redactor', () => {
     const redactor = new Redactor();

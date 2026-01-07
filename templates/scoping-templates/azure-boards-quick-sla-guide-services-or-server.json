@@ -1,0 +1,57 @@
+{
+  "id": "azure-boards-quick-sla-guide-services-or-server",
+  "title": "Azure Boards Quick SLA Guide -Services OR Server.",
+  "description": "Customer-facing scoping questionnaire for Boards issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Boards",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Boards/Boards-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "General Information",
+      "requiredFields": [
+        "What is the organization's name or Azure DevOps Server version?",
+        "Which project(s) are affected?",
+        "Which team(s) are affected?",
+        "What is the error returned? Do you have any screenshots of the error?",
+        "Provide a detailed description of the issue.",
+        "When did the issue start?",
+        "Did this work previously, or has it never worked?",
+        "Could you please capture a Fiddler or HAR trace of the issue reproduction? You can upload the resulting files to the File Transfer link provided.\n  • [Capture a browser trace for troubleshooting - Azure DevOps | Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/user-guide/capture-browser-trace?view=azure-devops&tabs=microsoft-edge)\n  • [How to collect a network trace | Microsoft Learn](https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-network-trace)",
+        "Provide a couple of affected Work Item (WI) IDs and the following information for each (please include a screenshot):\n  • Work Item Type\n  • Area Path\n  • Iteration Path\n  • State",
+        "Are there any Work Items for which this is working? If so, please provide a couple of examples and the fields requested in the previous point.",
+        "For Backlog issues:\n  • Is this a Sprint or a Requirement/Portfolio backlog? Please send a screenshot of the affected backlog.\n  • What are the Area Paths and Iterations assigned to the team of the backlog? Please send a screenshot.\n  • Do you have any filters currently set?"
+      ]
+    },
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "Is this a Sprint or a Kanban (Requirement/Portfolio) Board? Please send a screenshot of the affected board.",
+        "What are the Area Paths and Iterations assigned to the team of the backlog? Please send a screenshot of the team configuration.",
+        "Do you have any filters currently set?",
+        "If the Work Item is not visible in the Board or Backlog, is it visible when searched in the search bar or returned in a query?",
+        "Is the query a stored query or a new query?",
+        "If stored, what is the query URL?",
+        "Do the results improve if the query is simplified?",
+        "Please send a screenshot of the query statement and a snapshot of the results, including the queried fields, Area Path, and Iteration Path.",
+        "Is the project using an Inherited Process Template or an XML/Hosted XML process template?",
+        "If Inherited, which process is it inheriting from?",
+        "If XML/Hosted XML, please export the process template of the project and attach it to the case."
+      ]
+    }
+  ],
+  "totalRequiredFields": 22
+}

@@ -1,0 +1,56 @@
+{
+  "id": "build-troubleshooting-tips",
+  "version": "1.0.0",
+  "name": "What to ask the customer",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "build",
+    "release",
+    "agent",
+    "git",
+    "server",
+    "azure-devops",
+    "devops",
+    "what",
+    "customer"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "failure"
+    ]
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "ask": "What version of the agent are you on?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q2",
+      "ask": "What type of project are you building?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    },
+    {
+      "id": "q3",
+      "ask": "Does the code build in your local environment?",
+      "required": false,
+      "expectedFormat": "text",
+      "category": "diagnostic"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.862Z",
+    "updatedAt": "2026-01-07T18:11:38.862Z"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "22no-hosted-parallelism-has-been-purchased-or-granted22-in-azure-pipelines",
+  "version": "1.0.0",
+  "name": "%22No-hosted-parallelism-has-been-purchased-or-granted%22-in-Azure-Pipelines",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "pipeline",
+    "agent",
+    "azure-devops",
+    "devops",
+    "%22no-hosted-parallelism-has-been-purchased-or-granted%22-in-azure-pipelines"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "New Azure DevOps Services orgs used to include a single MS-Hosted agent for pipelines with 1800 free minutes of capacity each month. Due to crypto miners abusing this, we turned this free grant off. See [public docs](https://learn.microsoft.com/en-us/azure/devops/pipelines/licensing/concurrent-jobs) for more info.",
+      "likelihood": "High"
+    }
+  ],
+  "externalReferences": [
+    {
+      "title": "public docs",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/licensing/concurrent-jobs"
+    },
+    {
+      "title": "https://aka.ms/azpipelines-parallelism-request",
+      "url": "https://aka.ms/azpipelines-parallelism-request"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.976Z",
+    "updatedAt": "2026-01-07T18:11:38.976Z"
+  }
+}

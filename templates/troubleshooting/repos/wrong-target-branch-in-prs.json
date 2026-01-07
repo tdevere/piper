@@ -1,0 +1,45 @@
+{
+  "id": "wrong-target-branch-in-prs",
+  "version": "1.0.0",
+  "name": "**Scenario**",
+  "description": "",
+  "templateType": "troubleshooting",
+  "keywords": [
+    "pipelines",
+    "release",
+    "git",
+    "repository",
+    "repo",
+    "branch",
+    "pull-request",
+    "yaml",
+    "test",
+    "azure-devops"
+  ],
+  "errorPatterns": [
+    "HEAD"
+  ],
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "tags": [
+      "troubleshooting",
+      "diagnostic",
+      "error",
+      "configuration"
+    ]
+  },
+  "questions": [],
+  "initialHypotheses": [
+    {
+      "id": "h1",
+      "description": "- The `.azuredevops/pull_request_targets.yml` file may not be configured correctly.",
+      "likelihood": "High"
+    }
+  ],
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "createdAt": "2026-01-07T18:11:38.913Z",
+    "updatedAt": "2026-01-07T18:11:38.913Z"
+  }
+}

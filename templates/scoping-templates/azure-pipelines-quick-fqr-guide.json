@@ -1,0 +1,43 @@
+{
+  "id": "azure-pipelines-quick-fqr-guide",
+  "title": "Azure Pipelines Quick FQR Guide",
+  "description": "Customer-facing scoping questionnaire for Pipelines issues",
+  "classification": {
+    "domain": "Azure DevOps",
+    "area": "Pipelines",
+    "type": "scoping",
+    "tags": [
+      "intake",
+      "information-gathering",
+      "fqr",
+      "scoping"
+    ]
+  },
+  "metadata": {
+    "source": "Azure DevOps Wiki",
+    "sourceFile": "../Ingested-Content/Azure-DevOps/Pipelines/Pipeline-Scoping-Questions.md",
+    "stage": "intake",
+    "customerFacing": true
+  },
+  "scopingCategories": [
+    {
+      "category": "Checklist Items",
+      "requiredFields": [
+        "Azure DevOps Type: Azure DevOps Services or Server/TFS",
+        "Organization Name: e.g. `https://dev.azure.com/<ORG>`",
+        "Azure DevOps Version: e.g. *2020 Server*, *2019 Server*",
+        "Detailed description of your issue",
+        "Screenshot(s) of any errors",
+        "Pipeline Type: Classic or YAML",
+        "Agent Type: Self-hosted, Microsoft-hosted, VMSS, or MDP",
+        "Agent OS Type: Windows / Linux / macOS",
+        "Agent Pool Type: VMSS or MDP (specify if using a *vanilla* or *custom* image)",
+        "Pipeline History: Is this a new pipeline?",
+        "Pipeline Logs:",
+        "Pipeline URLs:",
+        "Self-hosted Agents:"
+      ]
+    }
+  ],
+  "totalRequiredFields": 13
+}
