@@ -265,7 +265,7 @@ export COPILOT_PATH=/custom/path/copilot  # Custom copilot binary location
 ### Requirements
 
 **For AI-Powered Features:**
-- GitHub Copilot CLI installed: `gh extension install github/gh-copilot`
+- GitHub Copilot CLI installed: `winget install GitHub.Copilot`
 - Authenticated GitHub account with Copilot access
 - `copilot` command available in PATH
 
@@ -659,7 +659,7 @@ piper agent-run xyz789
 
 - **Node.js 18+**
 - **npm or yarn**
-- **GitHub Copilot CLI** - Required for AI features: `gh extension install github/gh-copilot`
+- **GitHub Copilot CLI** - Required for AI features: `winget install GitHub.Copilot`
 - **GitHub account** with Copilot access
 
 ---
