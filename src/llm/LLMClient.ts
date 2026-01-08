@@ -331,7 +331,7 @@ Return ONLY the JSON object, no additional text.`;
     // Try LLM if enabled
     if (this.llmEnabled) {
       try {
-        if (this.llmProvider === 'copilot' || this.llmProvider === 'copilot-auto') {
+        if (this.llmProvider === 'copilot') {
           return await this.analyzeWithCopilot(c, questions);
         } else if (this.llmProvider === 'openai' && this.openai) {
           return await this.analyzeWithOpenAI(c, questions);
@@ -436,7 +436,7 @@ Respond in JSON format:
       
       return { suggestions };
     } catch (error: any) {
-      // If copilot-auto not available or fails, fall back to heuristics
+      // If copilot not available or fails, fall back to heuristics
       console.error('Copilot analysis unavailable:', error.message);
       if (error.stderr) console.error('Stderr:', error.stderr);
       console.error('Falling back to pattern matching');
@@ -448,7 +448,7 @@ Respond in JSON format:
     // Generate dynamic guidance for help command
     console.log(`[LLMClient.generateGuidance] Provider: ${this.llmProvider}, Enabled: ${this.llmEnabled}`);
     
-    if (this.llmEnabled && (this.llmProvider === 'copilot' || this.llmProvider === 'copilot-auto')) {
+    if (this.llmEnabled && this.llmProvider === 'copilot') {
       try {
         const { execSync } = require('child_process');
         const os = require('os');
@@ -490,7 +490,7 @@ Respond in JSON format:
           }
         }
       } catch (error: any) {
-        console.error('Copilot-auto guidance error:', error.message);
+        console.error('Copilot guidance error:', error.message);
         if (error.stderr) console.error('Stderr:', error.stderr);
         throw new Error(`Guidance generation failed: ${error.message}`);
       }

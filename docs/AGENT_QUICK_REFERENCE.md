@@ -3,11 +3,11 @@
 ## Setup
 
 ```bash
-# Install copilot-auto (VS Code Copilot CLI wrapper)
-# See: https://github.com/tdevere/copilot-auto
+# Install GitHub Copilot CLI
+winget install GitHub.Copilot
 
-# Configure for copilot-auto (default)
-echo "LLM_ENABLED=true\nLLM_PROVIDER=copilot-auto" > .env
+# Configure for copilot (default)
+echo "LLM_ENABLED=true\nLLM_PROVIDER=copilot" > .env
 
 # Or configure OpenAI
 echo "LLM_ENABLED=true\nLLM_PROVIDER=openai\nOPENAI_API_KEY=sk-..." > .env

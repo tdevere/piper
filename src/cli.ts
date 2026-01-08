@@ -1071,7 +1071,7 @@ ${previousContext ? `---\n\n## Previous Analysis Context\n\n${previousContext.su
           }
           
           if (llmEnabled) {
-              const providerName = llmProvider === 'copilot' || llmProvider === 'copilot-auto' ? 'AI (Copilot)' :
+              const providerName = llmProvider === 'copilot' ? 'AI (Copilot)' :
                                    llmProvider === 'openai' ? 'AI (OpenAI)' :
                                    llmProvider === 'azure' ? 'AI (Azure OpenAI)' : 'AI';
               console.log(chalk.cyan(`✨ Using AI-powered analysis (${providerName})`));
@@ -2943,12 +2943,12 @@ CRITICAL: Output ONLY the markdown document. Start with the # heading. No "Here 
 
           console.log(chalk.cyan('\n🤖 Analyzing case with AI...'));
           
-          // Use copilot-auto to generate solution
+          // Use copilot to generate solution
           const tempPromptFile = path.join(require('os').tmpdir(), `piper-solution-${Date.now()}.txt`);
           await fs.writeFile(tempPromptFile, prompt);
           
           const { execSync } = require('child_process');
-          const command = process.env.COPILOT_AUTO_PATH || 'copilot-auto';
+          const command = process.env.COPILOT_PATH || 'copilot';
           
           const metaInstruction = `Read the file ${tempPromptFile} and follow all the instructions in it.`;
           

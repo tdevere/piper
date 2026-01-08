@@ -512,9 +512,9 @@ EVIDENCE_SUMMARY: <what we have and what's missing>`;
       const fs = require('fs-extra');
       const path = require('path');
       
-      const command = process.env.COPILOT_AUTO_PATH || 'copilot-auto';
+      const command = process.env.COPILOT_PATH || 'copilot';
       
-      // Write prompt to temp file in cwd so copilot-auto can read it with relative path
+      // Write prompt to temp file in cwd so copilot can read it with relative path
       const tempFile = path.join(process.cwd(), `.piper-scope-${Date.now()}.txt`);
       await fs.writeFile(tempFile, prompt);
       
@@ -523,7 +523,7 @@ EVIDENCE_SUMMARY: <what we have and what's missing>`;
       
       // Show prompt in debug mode
       if (process.env.DEBUG === 'true' || process.env.SHOW_PROMPT === 'true') {
-        console.log(chalk.cyan('\n   ━━━━━━━━ PROMPT SENT TO COPILOT-AUTO ━━━━━━━━'));
+        console.log(chalk.cyan('\n   ━━━━━━━━ PROMPT SENT TO COPILOT ━━━━━━━━'));
         console.log(chalk.gray(prompt.substring(0, 2000)));
         if (prompt.length > 2000) {
           console.log(chalk.gray(`\n   ... (showing first 2000 of ${prompt.length} characters)`));
@@ -531,7 +531,7 @@ EVIDENCE_SUMMARY: <what we have and what's missing>`;
         console.log(chalk.cyan('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
       }
       
-      console.log(chalk.cyan(`   ⏳ Calling copilot-auto (typically 30-120 seconds)...`));
+      console.log(chalk.cyan(`   ⏳ Calling copilot (typically 30-120 seconds)...`));
       
       const startTime = Date.now();
       
@@ -572,7 +572,7 @@ EVIDENCE_SUMMARY: <what we have and what's missing>`;
         
         // Debug: Show raw response
         if (process.env.DEBUG === 'true' || process.env.SHOW_PROMPT === 'true') {
-          console.log(chalk.gray('\n   === RAW COPILOT-AUTO RESPONSE ==='));
+          console.log(chalk.gray('\n   === RAW COPILOT RESPONSE ==='));
           console.log(result);
           console.log(chalk.gray('   === END RESPONSE ===\n'));
         }

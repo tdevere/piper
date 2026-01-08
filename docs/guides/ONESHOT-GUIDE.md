@@ -238,7 +238,7 @@ Typical execution times:
 
 Times include:
 - Evidence ingestion and PII redaction
-- AI analysis (copilot-auto)
+- AI analysis (copilot)
 - Report generation
 
 ## Troubleshooting

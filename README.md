@@ -24,6 +24,30 @@ An intelligent troubleshooting system powered by a multi-agent AI architecture f
 
 ---
 
+## 📊 Current State
+
+**Maturity Level:** Beta (70% production-ready)
+
+### ✅ What's Complete
+- **Core Architecture:** Multi-agent system, state machine, orchestrator, case storage
+- **Templates:** 48 templates (12 scoping + 36 troubleshooting) + 6 agent profiles
+- **Evidence Processing:** PII redaction (15+ patterns), ZIP extraction, artifact tracking
+- **CLI:** 48 commands across case management, evidence, templates, agents
+- **AI Integration:** GitHub Copilot CLI + OpenAI API with heuristic fallback
+- **Template Learning:** Auto-improvement from resolved cases
+
+### ⚠️ Known Gaps
+- **Testing:** <20% code coverage, limited integration tests
+- **Evidence Extractors:** Empty directory, no structured log parsing
+- **Template Coverage:** Missing ~40 troubleshooting templates (Artifacts, Test Plans)
+- **Production Features:** No authentication, multi-user support, or monitoring
+- **Documentation:** Some TODOs, missing deployment guides
+
+### 🎯 Current Focus
+**Phase 1: Production Hardening** - Building comprehensive test suite, error handling, and code quality improvements. See [full roadmap](#️-roadmap) below.
+
+---
+
 ## 🚀 Quick Start
 
 **See it in action:** Check out [DEMO.md](docs/DEMO.md) for a complete walkthrough with realistic examples showing PII redaction and template learning.
@@ -761,15 +785,123 @@ MIT License - see LICENSE file for details
 
 ## 🛣️ Roadmap
 
+### ✅ Phase 0: Foundation (Complete)
 - [x] Multi-agent architecture with specialized roles
+- [x] State machine with 8-state workflow
 - [x] Template learning from resolved cases
 - [x] PII detection and redaction
 - [x] Auto-progression workflow
-- [ ] Web UI for case visualization
-- [ ] Integration with ticketing systems (Jira, Azure DevOps)
-- [ ] Advanced analytics and metrics dashboard
-- [ ] Template marketplace and sharing
-- [ ] Multi-provider AI support (Azure OpenAI, Anthropic)
+- [x] 48 templates + 6 agent profiles
+- [x] Evidence processing with ZIP extraction
+- [x] Interactive CLI with 48 commands
+
+### 🔄 Phase 1: Production Hardening (Current - 6 weeks)
+**Goal:** Stabilize and harden for production deployment
+
+- [ ] Comprehensive testing infrastructure (Jest, 80% coverage target)
+  - [ ] Unit tests for all core modules
+  - [ ] Integration tests for workflows
+  - [ ] E2E tests with real scenarios
+  - [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Error handling and resilience
+  - [ ] Retry logic for LLM API calls
+  - [ ] Graceful degradation when AI unavailable
+  - [ ] Session recovery for interruptions
+  - [ ] Structured logging (Winston)
+- [ ] Code quality and documentation
+  - [ ] Fix all TODOs and technical debt
+  - [ ] Architecture diagrams (C4 model)
+  - [ ] Deployment and troubleshooting guides
+  - [ ] API documentation
+
+### 📋 Phase 2: Enhanced Capabilities (8 weeks)
+**Goal:** Add intelligent evidence processing and expand template coverage
+
+- [ ] Evidence intelligence
+  - [ ] Log file parsers (Azure Pipelines, YAML, JSON)
+  - [ ] Stack trace analyzer
+  - [ ] Error pattern extraction
+  - [ ] Timeline reconstruction
+- [ ] Template expansion
+  - [ ] 40+ new troubleshooting templates (Artifacts, Test Plans, Boards, Repos)
+  - [ ] Template validation framework
+  - [ ] Template authoring guide
+- [ ] Advanced agent features
+  - [ ] Agent coordination (multi-agent cases)
+  - [ ] Agent learning from resolutions
+  - [ ] Performance metrics and debugging tools
+
+### 🏢 Phase 3: Enterprise Features (10 weeks)
+**Goal:** Support multi-user collaboration in organizations
+
+- [ ] Authentication and authorization
+  - [ ] Azure AD integration
+  - [ ] Role-based access control (Admin, Engineer, Viewer)
+  - [ ] Audit logging for compliance
+- [ ] Collaboration features
+  - [ ] Multi-user case collaboration
+  - [ ] Real-time updates (WebSocket)
+  - [ ] Comments and annotations
+  - [ ] Notification system (email, Teams, Slack)
+- [ ] Integration and API
+  - [ ] REST API with OpenAPI/Swagger docs
+  - [ ] Azure DevOps integration (auto-create cases from failed pipelines)
+  - [ ] Jira integration
+  - [ ] Webhook support
+
+### 🖥️ Phase 4: Web UI & Visualization (12 weeks)
+**Goal:** Intuitive web interface for all users
+
+- [ ] React foundation (TypeScript + Vite + Material-UI)
+- [ ] Core case management UI
+  - [ ] Dashboard with filters and search
+  - [ ] Case detail view with timeline
+  - [ ] Evidence viewer with redaction toggle
+  - [ ] Interactive Q&A and hypothesis validation
+- [ ] Advanced features
+  - [ ] Real-time agent monitoring
+  - [ ] Template marketplace UI
+  - [ ] Analytics dashboard (resolution metrics, template effectiveness)
+- [ ] Data visualization
+  - [ ] Case timeline (Gantt chart)
+  - [ ] Evidence relationship graph
+  - [ ] Hypothesis tree diagram
+
+### 📊 Phase 5: Analytics & Intelligence (8 weeks)
+**Goal:** Learn from historical data to improve troubleshooting
+
+- [ ] Metrics and reporting
+  - [ ] KPI tracking (MTTR, resolution rate, etc.)
+  - [ ] Automated reports and trend analysis
+  - [ ] Alerting for anomalies
+- [ ] Machine learning features
+  - [ ] Case similarity matching
+  - [ ] Complexity prediction
+  - [ ] Anomaly detection
+  - [ ] Root cause clustering
+- [ ] Knowledge base
+  - [ ] Auto-generated KB articles
+  - [ ] Search engine with knowledge graph
+  - [ ] Solution similarity matching
+
+### ⚡ Phase 6: Scale & Performance (6 weeks)
+**Goal:** Handle enterprise-scale workloads
+
+- [ ] Performance optimization
+  - [ ] Caching strategy (Redis)
+  - [ ] Database migration (PostgreSQL)
+  - [ ] LLM API optimization
+- [ ] Scalability
+  - [ ] Docker containerization
+  - [ ] Kubernetes deployment
+  - [ ] Horizontal scaling support
+  - [ ] Queue system (RabbitMQ/Azure Service Bus)
+- [ ] Reliability
+  - [ ] Backup and disaster recovery
+  - [ ] Rate limiting and circuit breakers
+  - [ ] Health checks and monitoring (Prometheus/Grafana)
+
+📖 **Detailed roadmap:** See [docs/ROADMAP.md](docs/ROADMAP.md) for sprint-level planning and success metrics
 
 ---
 

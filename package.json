@@ -1,7 +1,7 @@
 {
   "name": "pipelineexpert",
   "version": "1.0.0",
-  "description": "",
+  "description": "P.I.P.E.R - Pipeline Intelligent Problem Expert & Resolver: AI-powered troubleshooting system for Azure DevOps",
   "main": "index.js",
   "bin": {
     "piper": "./dist/src/cli.js"
@@ -11,13 +11,32 @@
     "lint": "eslint src/**",
     "format": "prettier --write src/**",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
     "demo": "ts-node src/demo-replay.ts",
     "start": "node dist/src/cli.js"
   },
-  "keywords": [],
+  "keywords": [
+    "azure-devops",
+    "troubleshooting",
+    "ai",
+    "multi-agent",
+    "copilot",
+    "pipeline",
+    "devops"
+  ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tdevere/piper.git"
+  },
+  "status": "beta",
+  "maturity": "70% production-ready",
+  "currentPhase": "Phase 1: Production Hardening",
+  "roadmap": "docs/ROADMAP.md",
   "dependencies": {
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.16",

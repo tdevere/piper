@@ -114,7 +114,7 @@ Automatically generated tags from case context, classification, and error patter
 
 ## AI-Powered Generation
 
-The solution document is generated using **copilot-auto** AI which:
+The solution document is generated using **GitHub Copilot CLI** AI which:
 - Analyzes all case data (questions, evidence, timeline, hypotheses)
 - Synthesizes information into a coherent narrative
 - Structures content for easy knowledge base consumption

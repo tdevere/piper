@@ -26,7 +26,7 @@ Manages the complete lifecycle of agent sessions:
 **Location:** `src/agents/CopilotAgentBridge.ts`
 
 Wraps GitHub Copilot CLI as a persistent process:
-- Calls `copilot-auto` with conversation context
+- Calls `copilot` with conversation context
 - Implements safety controls:
   - Iteration limits (default: 50)
   - Time limits (default: 30 minutes)
@@ -36,7 +36,7 @@ Wraps GitHub Copilot CLI as a persistent process:
 
 **Process Management:**
 ```typescript
-// Calls: copilot-auto --direct "<prompt>"
+// Calls: copilot --direct "<prompt>"
 const response = await bridge.prompt(message, conversationHistory);
 ```
 
@@ -398,11 +398,11 @@ piper show a525126d
 
 ### GitHub Copilot CLI
 ```bash
-# Install copilot-auto CLI wrapper
-# See: https://github.com/tdevere/copilot-auto
+# Install GitHub Copilot CLI
+winget install GitHub.Copilot
 
 # Verify installation
-copilot-auto --version
+copilot --version
 ```
 
 ### Alternative: OpenAI API
